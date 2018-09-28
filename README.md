@@ -16,8 +16,7 @@
     $ pip install keras
 ### Installing
 #### [Function Simulation](##function-simulation)
-- 1 for the first function, 2 for the second
-
+##### 1 for the first function, 2 for the second
     $ python sim_func.py 1
     $ python sim_func.py 2
 #### [Train on Actual Task](##train-on-actual-task)
