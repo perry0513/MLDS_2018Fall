@@ -36,11 +36,11 @@
 <a id="dnn-conclution"></a>
 
 ### Conclution 
-    * Deeper is better (in our case)
-    * Functions cannot be too simple or complicated
-    * LeakyReLU seems to work better than ReLU
-        * Dying ReLU problem
-        * LeakyReLU, ELU can solve the problem
+    Deeper is better (in our case)
+    Functions cannot be too simple or complicated
+    LeakyReLU seems to work better than ReLU
+        Dying ReLU problem
+        LeakyReLU, ELU can solve the problem
 
 ## Train on Actual Task
 <a id="cnn-models"></a>
@@ -53,7 +53,7 @@
 <a id="cnn-conclution"></a>
 
 ### Conclution 
-    * Thicker convolutional layer may not perform better
-    * For such easy cases, more hidden layers seem not to be beneficial
-    * Model 4 performs the best
+    Thicker convolutional layer may not perform better
+    For such easy cases, more hidden layers seem not to be beneficial
+    Model 4 performs the best
 
