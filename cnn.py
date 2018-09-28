@@ -27,7 +27,7 @@ def load_data(train_size):
 # args
 train_size = 10000
 batch_size = 200
-epochs = 50
+epochs = 500
 
 (x_train, y_train) , (x_test, y_test) = load_data(train_size)
 model = [ Sequential(), Sequential(), Sequential() ]
