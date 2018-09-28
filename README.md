@@ -39,8 +39,6 @@
     Deeper is better (in our case)
     Functions cannot be too simple or complicated
     LeakyReLU seems to work better than ReLU
-        Dying ReLU problem
-        LeakyReLU, ELU can solve the problem
 
 ## Train on Actual Task
 <a id="cnn-models"></a>
