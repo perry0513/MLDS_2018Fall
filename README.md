@@ -1,10 +1,13 @@
 # MLDS_hw1
 
-### Function Simulation
-    - Four models
-    - y = sin(3πx) + sin(4πx)
-    - y = esp(sin(40x)) * log(x+1)
+## Function Simulation
+### Models
+### Simulated Functions
+    y = sin(3πx) + sin(4πx)
+    y = esp(sin(40x)) * log(x+1)
+### Results
 
-### Convolutional Neural Network (CNN)
-    - Four models
-    - Completely no idea why it works like this.
+## Train on Actual Task
+### Models
+### Loss and Accuracy
+### Results
