@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 from keras.models import Sequential
 from keras.layers import Dense, Activation, LeakyReLU
@@ -8,17 +9,16 @@ from keras.datasets import mnist
 from keras.callbacks import Callback
 from matplotlib import pyplot as plt
 
-class LossHistory(Callback):
-    def on_train_begin(self, logs={}):
-        self.losses = []
-    def on_batch_end(self, batch, logs={}):
-        self.losses.append(logs.get('loss'))
-
 # function to be simulated
 def function(arr):
-	# return 0.5*np.sin(10*np.pi*(arr-0.5))*np.abs(arr-0.5)
-	# return 0.5*np.sin(10*np.pi*(arr-0.5))/(10*np.pi*(arr-0.5))
-	return 0.5*(np.sin(6*np.pi*(arr-0.5))+np.sin(8*np.pi*(arr-0.5)))
+	if len(sys.argv) < 2:
+		sys.exit()
+	elif int(sys.argv[1]) == 1:
+		return 0.5*(np.sin(6*np.pi*(arr-0.5))+np.sin(8*np.pi*(arr-0.5)))
+	elif int(sys.argv[1]) == 2:
+		return np.exp(np.sin(40*arr))*np.log(arr+1)
+	else:
+		sys.exit()
 
 # args
 data_size = 10000

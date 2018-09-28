@@ -5,18 +5,20 @@
 * [Function Simulation](#function-simulation)
     * [Models](#dnn-models)
     * [Simulated Function](#simulated-functions)
-    * [Conclusion](#dnn-conclution)
+    * [Conclusion](#dnn-conclusion)
 * [Train on Actual Task](#train-on-actual-task)
     * [CNN Models](#cnn-models)
     * [Loss and Accuracy](#loss-and-accuracy)
-    * [Conclusion](#cnn-conclution)
+    * [Conclusion](#cnn-conclusion)
 ## Getting Started
 ### Prerequisites
     $ pip install tensorflow
     $ pip install keras
 ### Installing
 #### [Function Simulation](##function-simulation)
-    $ python sim_func.py
+	1 for the first function, 2 for the second
+    $ python sim_func.py 1
+    $ python sim_func.py 2
 #### [Train on Actual Task](##train-on-actual-task)
     $ python cnn.py
 ## Function Simulation
@@ -33,9 +35,9 @@
 - y = esp(sin(40x)) * log(x+1)
 
     ![](readme_src/sim_function2.png)
-<a id="dnn-conclution"></a>
+<a id="dnn-conclusion"></a>
 
-### Conclution 
+### Conclusion 
     Deeper is better (in our case)
     Functions cannot be too simple or complicated
     LeakyReLU seems to work better than ReLU
@@ -48,9 +50,9 @@
 ![](readme_src/cnn_model3,4.png)
 ### Loss and Accuracy
 ![](readme_src/cnn_loss&accuracy.png)
-<a id="cnn-conclution"></a>
+<a id="cnn-conclusion"></a>
 
-### Conclution 
+### Conclusion 
     Thicker convolutional layer may not perform better
     For such easy cases, more hidden layers seem not to be beneficial
     Model 4 performs the best
