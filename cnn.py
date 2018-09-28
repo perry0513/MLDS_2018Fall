@@ -30,7 +30,7 @@ batch_size = 200
 epochs = 500
 
 (x_train, y_train) , (x_test, y_test) = load_data(train_size)
-model = [ Sequential(), Sequential(), Sequential() ]
+model = [ Sequential(), Sequential(), Sequential(), Sequential() ]
 hist = []
 
 # model_1
@@ -69,6 +69,14 @@ model[2].add(Dense(units=7, activation='relu'))
 model[2].add(Dense(units=12, activation='relu'))
 model[2].add(Dense(units=7, activation='relu'))
 model[2].add(Dense(units=10, activation='softmax'))
+
+# model_4
+model[3].add(Conv2D(17, kernel_size=(12,12), strides=(1,1), input_shape=(28,28,1), use_bias=False))
+model[3].add(MaxPooling2D(4,4))
+
+model[3].add(Flatten())
+model[3].add(Dense(units=10, activation='relu'))
+model[3].add(Dense(units=10, activation='softmax'))
 
 for i in range(len(model)):
 	model[i].compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
