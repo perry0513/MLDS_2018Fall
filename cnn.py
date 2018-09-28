@@ -80,7 +80,7 @@ model[3].add(Dense(units=10, activation='softmax'))
 
 for i in range(len(model)):
 	model[i].compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-	hist.append( model[i].fit(x_train, y_train, batch_size=batch_size, epochs=epochs) )
+	hist.append( model[i].fit(x_train, y_train, batch_size=batch_size, epochs=epochs, shuffle=True) )
 
 for i in range(len(model)):
 	print('\nModel_%i' %(i+1))
