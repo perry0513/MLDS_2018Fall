@@ -25,16 +25,16 @@
 <a id="dnn-models"></a>
 
 ### Models
-![](readme_src/hw1-1/sim_model1,2.png)
-![](readme_src/hw1-1/sim_model3,4.png)
+![](readme_src/hw1-1/sim_model1,2.png)
+![](readme_src/hw1-1/sim_model3,4.png)
 
 ### Simulated Functions
 - y = sin(3πx) + sin(4πx)
 
-    ![](readme_src/sim_function1.png)
+    ![](readme_src/hw1-1/sim_function1.png)
 - y = esp(sin(40x)) * log(x+1)
 
-    ![](readme_src/sim_function2.png)
+    ![](readme_src/hw1-1/sim_function2.png)
 <a id="dnn-conclusion"></a>
 
 ### Conclusion 
@@ -46,10 +46,10 @@
 <a id="cnn-models"></a>
 
 ### Models
-![](readme_src/hw1-1/cnn_model1,2.png)
-![](readme_src/hw1-1/cnn_model3,4.png)
+![](readme_src/hw1-1/cnn_model1,2.png)
+![](readme_src/hw1-1/cnn_model3,4.png)
 ### Loss and Accuracy
-![](readme_src/hw1-1/cnn_loss&accuracy.png)
+![](readme_src/hw1-1/cnn_loss&accuracy.png)
 <a id="cnn-conclusion"></a>
 
 ### Conclusion 
