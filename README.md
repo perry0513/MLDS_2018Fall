@@ -25,8 +25,8 @@
 <a id="dnn-models"></a>
 
 ### Models
-![](readme_src/sim_model1,2.png)
-![](readme_src/sim_model3,4.png)
+![](readme_src/hw1-1/sim_model1,2.png)
+![](readme_src/hw1-1/sim_model3,4.png)
 
 ### Simulated Functions
 - y = sin(3πx) + sin(4πx)
@@ -46,10 +46,10 @@
 <a id="cnn-models"></a>
 
 ### Models
-![](readme_src/cnn_model1,2.png)
-![](readme_src/cnn_model3,4.png)
+![](readme_src/hw1-1/cnn_model1,2.png)
+![](readme_src/hw1-1/cnn_model3,4.png)
 ### Loss and Accuracy
-![](readme_src/cnn_loss&accuracy.png)
+![](readme_src/hw1-1/cnn_loss&accuracy.png)
 <a id="cnn-conclusion"></a>
 
 ### Conclusion 
