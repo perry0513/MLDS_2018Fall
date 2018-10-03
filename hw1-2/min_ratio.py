@@ -9,25 +9,6 @@ from torch.autograd import Variable
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
-class Net(nn.Module):
-	def __init__(self):
-		super(Net, self).__init__()
-		self.fc1 = nn.Linear(1, 4)
-		self.fc2 = nn.Linear(4, 9)
-		self.fc3 = nn.Linear(9, 16)
-		self.fc4 = nn.Linear(16, 9)
-		self.fc5 = nn.Linear(9, 4)
-		self.fc6 = nn.Linear(4, 1)
-
-	def forward(self, x):
-		x = F.leaky_relu(self.fc1(x), 0.1)
-		x = F.leaky_relu(self.fc2(x), 0.1)
-		x = F.leaky_relu(self.fc3(x), 0.1)
-		x = F.leaky_relu(self.fc4(x), 0.1)
-		x = F.leaky_relu(self.fc5(x), 0.1)
-		x = self.fc6(x)
-		return x
-
 def func(arr):
 	return np.sin(5*np.pi*arr)/(5*np.pi*arr)
 	# return np.exp(np.sin(40*arr))*np.log(arr+1)
@@ -35,10 +16,22 @@ def func(arr):
 
 TRAIN_SIZE = 10000
 BATCH_SIZE = 200
-EPOCHS = 10
+EPOCHS = 300
 
 
-model = Net()
+model = nn.Sequential(
+			nn.Linear(1, 4),
+			nn.LeakyReLU(),
+			nn.Linear(4, 9),
+			nn.LeakyReLU(),
+			nn.Linear(9,16),
+			nn.LeakyReLU(),
+			nn.Linear(16,9),
+			nn.LeakyReLU(),
+			nn.Linear(9, 4),
+			nn.LeakyReLU(),
+			nn.Linear(4, 1)
+		)
 
 # pack data
 x_train, x_test = torch.rand(TRAIN_SIZE, 1), torch.rand(TRAIN_SIZE, 1)
@@ -107,9 +100,11 @@ for epoch in range(EPOCHS):
 	for i, (x, y) in enumerate(train_loader):
 		output = model(x)
 		loss = criterion(output, y)
+		# computes gradient norm for each parameters
 		g = torch.autograd.grad(loss, model.parameters(), retain_graph=True, create_graph=True)
 		g_sq = sum([grad.norm() ** 2 for grad in g])
 		optimizer.zero_grad()
+		# let gradient norm of loss function be the new loss function, backprop
 		g_sq.backward(retain_graph=True)
 		optimizer.step()
 
@@ -137,50 +132,30 @@ test_loss = test(model)
 print("Test loss: ", test_loss)
 
 # Sample & determine minimal ratio
-n = torch.distributions.Normal(torch.Tensor([0.]), torch.Tensor([1.]))
-print('=============MODEL PARAM=============')
-print(list(model.parameters())[0])
+# creates normal dist. with mean = 0 std = 1e-4
+n = torch.distributions.Normal(torch.Tensor([0.]), torch.Tensor([1e-4]))
+
+# add noise to parameters
+def add_noise(m):
+	if type(m) == nn.Linear:
+		# n.sample will add an extra dim(?), so squeeze
+		m.weight.data.add_(n.sample(m.weight.data.shape).squeeze(2))
+		m.bias.data.add_(n.sample(m.bias.data.shape).squeeze(1))
 
 
-SAMPLE = 1
+SAMPLE = 200
 min_count = 0
-eq_count = 0
 for i in tqdm(range(SAMPLE)):
+	# deep copy model
 	model_cp = copy.deepcopy(model)
-	# model_cp.load_state_dict(model.state_dict())
-	print(id(model))
-	print(id(model_cp))
-	print(id(model.parameters()))
-	print(id(model_cp.parameters()))
-	for param in model.parameters():
-		print(id(param))
+	# add noise to copied model
+	model_cp.apply(add_noise)
 
-	# add random small num to params
-	for param in model.parameters():
-		print('BEFORE:')
-		print(id(param))
-		rand = torch.ones_like(param)#n.sample(param.shape).squeeze()
-		param = param + rand
-		print('AFTER:')
-		# print(param)
-
-###
-	print(model.parameters() == model_cp.parameters())
-	print('=============MODEL PARAM=============')
-	print(list(model.parameters())[0])
-	print('=============MODEL_CP PARAM=============')
-	print(model_cp.parameters())
-
-###
 	m_loss = test(model_cp)
 	if m_loss > test_loss: 
 		min_count = min_count + 1
-	elif m_loss == test_loss:
-		eq_count = eq_count + 1
 
 
-print('(min ratio, loss, eq_count): ({},{},{})'.format(min_count/SAMPLE, test_loss, eq_count))
-
-
-
+print('(min ratio, loss, eq_count): ({},{})'.format(min_count/SAMPLE, test_loss))
+plot()
 
