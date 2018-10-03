@@ -51,12 +51,13 @@ for epoch in range(EPOCHS):
 	for i, (x, y) in enumerate(train_loader):
 		optimizer.zero_grad()
 		output = model(x)
+		# objective function = loss function
 		loss = criterion(output, y)
-
+		# compute gradient norm
 		g = torch.autograd.grad(loss, model.parameters(), retain_graph=True, create_graph=True)
 		g_sq = sum([grad.norm() ** 2 for grad in g])
 		norm = g_sq.cpu().data.sqrt()
-
+		
 		loss.backward()
 		optimizer.step()
 
@@ -100,14 +101,13 @@ for epoch in range(EPOCHS):
 	for i, (x, y) in enumerate(train_loader):
 		output = model(x)
 		loss = criterion(output, y)
-		# computes gradient norm for each parameters
+		# compute gradient norm for each parameters
 		g = torch.autograd.grad(loss, model.parameters(), retain_graph=True, create_graph=True)
 		g_sq = sum([grad.norm() ** 2 for grad in g])
 		optimizer.zero_grad()
-		# let gradient norm of loss function be the new loss function, backprop
+		# new objective function = gradient norm of loss function, backprop
 		g_sq.backward(retain_graph=True)
 		optimizer.step()
-
 
 		if (i+1) % 50 == 0:
 			norm = g_sq.cpu().data.sqrt()
