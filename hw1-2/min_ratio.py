@@ -146,8 +146,8 @@ SAMPLE = 1
 min_count = 0
 eq_count = 0
 for i in tqdm(range(SAMPLE)):
-	model_cp = Net()
-	model_cp.load_state_dict(model.state_dict())
+	model_cp = copy.deepcopy(model)
+	# model_cp.load_state_dict(model.state_dict())
 	print(id(model))
 	print(id(model_cp))
 	print(id(model.parameters()))
