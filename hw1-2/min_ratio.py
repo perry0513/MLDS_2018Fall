@@ -166,7 +166,10 @@ for exp in range(EXPERIMENTS):
 	min_loss.append(test_loss)
 	# plot()
 
-plt.scatter(min_ratio, min_loss)
+plt.plot(min_ratio, min_loss, 'ro')
+plt.xlim(-0.01,0.65)
+plt.ylim(-0.01,0.2)
+# plt.margins(0.5, tight=None)
 plt.title('STD of noise: '+ str(NOISE_STD))
 plt.xlabel('min ratio')
 plt.ylabel('loss')
