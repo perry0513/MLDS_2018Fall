@@ -1,4 +1,5 @@
 import numpy as np
+import copy
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -145,22 +146,30 @@ SAMPLE = 1
 min_count = 0
 eq_count = 0
 for i in tqdm(range(SAMPLE)):
-	model_cp = model
+	model_cp = Net()
+	model_cp.load_state_dict(model.state_dict())
+	print(id(model))
+	print(id(model_cp))
+	print(id(model.parameters()))
+	print(id(model_cp.parameters()))
+	for param in model.parameters():
+		print(id(param))
+
 	# add random small num to params
-	for param in model_cp.parameters():
+	for param in model.parameters():
 		print('BEFORE:')
-		print(param)
+		print(id(param))
 		rand = torch.ones_like(param)#n.sample(param.shape).squeeze()
 		param = param + rand
 		print('AFTER:')
-		print(param)
+		# print(param)
 
 ###
 	print(model.parameters() == model_cp.parameters())
 	print('=============MODEL PARAM=============')
-	print(model.parameters()[0])
-	print('=============MODEL_CP PARAM=============')
 	print(list(model.parameters())[0])
+	print('=============MODEL_CP PARAM=============')
+	print(model_cp.parameters())
 
 ###
 	m_loss = test(model_cp)
