@@ -157,7 +157,7 @@ for exp in range(EXPERIMENTS):
 							# 	WOOOOOOOOOOOOOOOW_b = True
 						if WOOOOOOOOOOOOOOOW_w:
 							print('NEW WEIGHT_GRAD\n', layer.weight.grad)
-						elif WOOOOOOOOOOOOOOOW_b:
+						if WOOOOOOOOOOOOOOOW_b:
 							print('NEW BIAS_GRAD\n', layer.bias.grad)
 				return loss
 
@@ -168,6 +168,7 @@ for exp in range(EXPERIMENTS):
 				
 		loss_hist.append(loss)
 
+	print(loss_hist[-10:])
 	# plot()
 	# return test loss
 	def test(m):
