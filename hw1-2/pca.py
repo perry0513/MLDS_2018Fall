@@ -11,19 +11,26 @@ import torchvision
 # Config
 BATCH_SIZE = 600
 EPOCHS = 100
+NUM_COLOR = 8
 
 class Net(nn.Module):
 	def __init__(self):
 		super(Net, self).__init__()
 		self.fc1 = nn.Linear(28*28, 128)
 		self.fc2 = nn.Linear(128, 128)
-		self.fc3 = nn.Linear(128, 10)
+		self.fc3 = nn.Linear(128, 64)
+		self.fc4 = nn.Linear(64, 32)
+		self.fc5 = nn.Linear(32, 16)
+		self.fc6 = nn.Linear(16, 10)
 
 
 	def forward(self, x):
 		x = F.relu(self.fc1(x))
 		x = F.relu(self.fc2(x))
-		x = self.fc3(x)
+		x = F.relu(self.fc3(x))
+		x = F.relu(self.fc4(x))
+		x = F.relu(self.fc5(x))
+		x = self.fc6(x)
 		return x
 
 model = Net()
@@ -32,7 +39,7 @@ if torch.cuda.is_available():
 print(model)
 
 # pack data
-train_data = dset.MNIST(root='./MNIST-data/', train=True, transform=torchvision.transforms.ToTensor(), download=False)
+train_data = dset.MNIST(root='./MNIST-data/', train=True, transform=torchvision.transforms.ToTensor(), download=True)
 test_data = dset.MNIST(root='./MNIST-data/', train=False, transform=torchvision.transforms.ToTensor())
 train_loader = utils.DataLoader(dataset=train_data, batch_size=BATCH_SIZE, shuffle=True)
 test_loader   = utils.DataLoader(dataset=test_data, batch_size=BATCH_SIZE)
@@ -65,16 +72,19 @@ def weights_init(m):
 # train
 acc_hist_list = []
 C_list = []
+C_1_list = []
 
-for t in range(8):
+for t in range(NUM_COLOR):
 	model.apply(weights_init)
 	loss = 0
 	loss_hist = []
 	total_step = len(train_loader)
 	params_hist = torch.Tensor()
+	params_1_hist = torch.Tensor()
 	acc_hist = []
 	if torch.cuda.is_available:
 		params_hist = params_hist.cuda()
+		params_1_hist = params_1_hist.cuda()
 	for epoch in range(EPOCHS):
 		# collect params
 		if epoch % 3 == 0:
@@ -83,7 +93,9 @@ for t in range(8):
 				params = params.cuda()
 			for p in model.parameters():
 				params = torch.cat((params,p.view(1,-1)),1)
+			params_1 = torch.cat((list(model.parameters())[0].view(1,-1),list(model.parameters())[1].view(1,-1)),1)
 			params_hist = torch.cat((params_hist,params),0)
+			params_1_hist = torch.cat((params_1_hist,params_1),0)
 			acc_hist.append(acc()*100.)
 			print ('accuracy: ', acc_hist[-1])
 		for i, (x, y) in enumerate(train_loader):
@@ -101,6 +113,9 @@ for t in range(8):
 	U,S,V = torch.svd(torch.transpose(params_hist,0,1))
 	C = torch.mm(params_hist,U[:,:2])
 	C_list.append(C.transpose(0,1))
+	U,S,V = torch.svd(torch.transpose(params_1_hist,0,1))
+	C = torch.mm(params_1_hist,U[:,:2])
+	C_1_list.append(C.transpose(0,1))
 	acc_hist_list.append(acc_hist)
 
 # test
@@ -117,11 +132,19 @@ with torch.no_grad():
 # plot
 with np.errstate(invalid='ignore', divide='ignore') and torch.no_grad():
 	fig = plt.figure()
-	ax1 = fig.add_subplot(111)
-	for t in range(8):
+	ax1 = fig.add_subplot(122)
+	ax2 = fig.add_subplot(121)
+	for t in range(NUM_COLOR):
 		x_plot = C_list[t][0].cpu().detach().numpy()
 		y_plot = C_list[t][1].cpu().detach().numpy()
 		ax1.scatter(x_plot,y_plot,s=1,color='C'+str(t))
+		ax1.set_title('whole model')
 		for i,(j,k) in enumerate(zip(x_plot,y_plot)):
 			ax1.annotate("%.2f"%acc_hist_list[t][i],xy=(j,k),fontsize=8,color='C'+str(t))
+		x_plot = C_1_list[t][0].cpu().detach().numpy()
+		y_plot = C_1_list[t][1].cpu().detach().numpy()
+		ax2.scatter(x_plot,y_plot,s=1,color='C'+str(t))
+		ax2.set_title('layer 1')
+		for i,(j,k) in enumerate(zip(x_plot,y_plot)):
+			ax2.annotate("%.2f"%acc_hist_list[t][i],xy=(j,k),fontsize=8,color='C'+str(t))
 	plt.show()
