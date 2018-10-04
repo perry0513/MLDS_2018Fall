@@ -67,10 +67,12 @@ for exp in range(EXPERIMENTS):
 			loss.backward()
 			optimizer.step()
 
-			
+			if (i+1) % 100 == 0:
+				print ('Data [{}/{}] |\tEpoch [{}/{}] |\tStep [{}/{}] |\t\tLoss: {:.6f} |\t grad_norm: {:.5f}' 
+	                   .format(exp+1, EXPERIMENTS, epoch+1, EPOCHS, i+1, total_step, loss.item(), norm))			
 
-			print ('Data [{}/{}] |\tEpoch [{}/{}] |\tStep [{}/{}] |\t\tLoss: {:.6f} |\t grad_norm: {:.5f}' 
-                   .format(exp+1, EXPERIMENTS, epoch+1, EPOCHS, i+1, total_step, loss.item(), norm))
+			# print ('Data [{}/{}] |\tEpoch [{}/{}] |\tStep [{}/{}] |\t\tLoss: {:.6f} |\t grad_norm: {:.5f}' 
+                   # .format(exp+1, EXPERIMENTS, epoch+1, EPOCHS, i+1, total_step, loss.item(), norm))
 				
 		loss_hist.append(loss)
 		norm_hist.append(norm)
@@ -117,20 +119,29 @@ for exp in range(EXPERIMENTS):
 
 				for layer in model:
 					if type(layer) == nn.Linear:
-						for row in layer.weight:
+						WOOOOOOOOOOOOOOOW = False
+						for row in layer.weight.grad:
 							for elem in row:
 								if elem > 5:
 									elem = 5
+									print('WEIGHT WOOOOOOOOOOOOOOOW!!!!')
+									WOOOOOOOOOOOOOOOW = True
 								elif elem < -5:
 									elem = -5
-									# print('WEIGHT WOOOOOOOOOOOOOOOW!!!!')
-						for elem in layer.bias:
+									print('WEIGHT WOOOOOOOOOOOOOOOW!!!!')
+									WOOOOOOOOOOOOOOOW = True
+						for elem in layer.bias.grad:
 							if elem > 5:
 								elem = 5
+								print('BIAS WOOOOOOOOOOOOOOOW!!!!')
+								WOOOOOOOOOOOOOOOW = True
 							elif elem < -5:
 								elem = -5
-								# print('WEIGHT WOOOOOOOOOOOOOOOW!!!!')					
-
+								print('BIAS WOOOOOOOOOOOOOOOW!!!!')
+								WOOOOOOOOOOOOOOOW = True
+						if WOOOOOOOOOOOOOOOW:
+							print('WEIGHT_GRAD ', layer.weight.grad)
+							print('BIAS_GRAD ', layer.bias.grad)
 				# print(model[4].weight.grad)
 				# print('({}) loss:{}'.format(output, loss))
 				# print('=================================')
