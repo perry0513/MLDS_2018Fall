@@ -25,6 +25,7 @@ SAMPLE = 200
 NOISE_STD = 1e-4
 EXPERIMENTS = 1
 EPOCH_LFBGS = 10 	# dangerous if too big
+MAX_GRAD = 5.0
 
 min_ratio, min_loss = [], []
 
@@ -119,32 +120,45 @@ for exp in range(EXPERIMENTS):
 
 				for layer in model:
 					if type(layer) == nn.Linear:
-						WOOOOOOOOOOOOOOOW = False
-						for row in layer.weight.grad:
-							for elem in row:
-								if elem > 5:
-									elem = 5
-									print('WEIGHT WOOOOOOOOOOOOOOOW!!!!')
-									WOOOOOOOOOOOOOOOW = True
-								elif elem < -5:
-									elem = -5
-									print('WEIGHT WOOOOOOOOOOOOOOOW!!!!')
-									WOOOOOOOOOOOOOOOW = True
-						for elem in layer.bias.grad:
-							if elem > 5:
-								elem = 5
-								print('BIAS WOOOOOOOOOOOOOOOW!!!!')
-								WOOOOOOOOOOOOOOOW = True
-							elif elem < -5:
-								elem = -5
-								print('BIAS WOOOOOOOOOOOOOOOW!!!!')
-								WOOOOOOOOOOOOOOOW = True
-						if WOOOOOOOOOOOOOOOW:
-							print('WEIGHT_GRAD ', layer.weight.grad)
-							print('BIAS_GRAD ', layer.bias.grad)
-				# print(model[4].weight.grad)
-				# print('({}) loss:{}'.format(output, loss))
-				# print('=================================')
+						WOOOOOOOOOOOOOOOW_w, WOOOOOOOOOOOOOOOW_b = False, False
+						weight_printed, bias_printed = False, False
+						for r in range(len(layer.weight.grad)):
+							for i in range(len(layer.weight.grad[r])):
+								if abs(layer.weight.grad[r][i]) > MAX_GRAD:
+									if not weight_printed: 
+										print('OLD WEIGHT\n',layer.weight.grad)
+										weight_printed = True
+									layer.weight.grad[r][i] = MAX_GRAD if layer.weight.grad[r][i] > 5 else -MAX_GRAD
+									# layer.weight.grad = torch.zeros_like(layer.weight)
+									WOOOOOOOOOOOOOOOW_w = True
+								# if elem > MAX_GRAD:
+								# 	print('OLD WEIGHT\n',layer.weight.grad)
+								# 	elem = MAX_GRAD
+								# 	WOOOOOOOOOOOOOOOW_w = True
+								# elif elem < -MAX_GRAD:
+								# 	print('OLD WEIGHT\n',layer.weight.grad)
+								# 	elem = -MAX_GRAD
+								# 	WOOOOOOOOOOOOOOOW_w = True
+						for i in range(len(layer.bias.grad)):
+							if abs(layer.bias.grad[i]) > MAX_GRAD:
+								layer.bias.grad[i] = MAX_GRAD if layer.bias.grad[i] > 5 else -MAX_GRAD
+								# layer.bias.grad = torch.zeros_like(layer.bias)
+								WOOOOOOOOOOOOOOOW_b = True
+								if not bias_printed:
+									print('OLD BIAS\n',layer.bias.grad)
+									bias_printed = True
+							# if elem > MAX_GRAD:
+							# 	print('OLD BIAS\n',layer.bias.grad)
+							# 	elem = MAX_GRAD
+							# 	WOOOOOOOOOOOOOOOW_b = True
+							# elif elem < -MAX_GRAD:
+							# 	print('OLD BIAS\n',layer.bias.grad)
+							# 	elem = -MAX_GRAD
+							# 	WOOOOOOOOOOOOOOOW_b = True
+						if WOOOOOOOOOOOOOOOW_w:
+							print('NEW WEIGHT_GRAD\n', layer.weight.grad)
+						if WOOOOOOOOOOOOOOOW_b:
+							print('NEW BIAS_GRAD\n', layer.bias.grad)
 				return loss
 
 			loss = optimizer.step(closure)
@@ -154,6 +168,7 @@ for exp in range(EXPERIMENTS):
 				
 		loss_hist.append(loss)
 
+	print(loss_hist[-10:])
 	# plot()
 	# return test loss
 	def test(m):
