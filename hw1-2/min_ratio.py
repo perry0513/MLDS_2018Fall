@@ -17,10 +17,10 @@ def func(arr):
 # hyper parameters
 TRAIN_SIZE = 10000
 BATCH_SIZE = 200
-EPOCHS = 50
-SAMPLE = 50
+EPOCHS = 200
+SAMPLE = 200
 NOISE_STD = 1e-4
-EXPERIMENTS = 50
+EXPERIMENTS = 100
 
 min_ratio, min_loss = [], []
 
@@ -137,6 +137,8 @@ for exp in range(EXPERIMENTS):
 	test_loss = test(model)
 	print("Test loss: ", test_loss)
 
+
+
 	# Sample & determine minimal ratio
 	# creates normal dist. with mean = 0 std = 1e-4
 	n = torch.distributions.Normal(torch.Tensor([0.]), torch.Tensor([NOISE_STD]))
@@ -147,7 +149,6 @@ for exp in range(EXPERIMENTS):
 			# n.sample will add an extra dim(?), so squeeze
 			m.weight.data.add_(n.sample(m.weight.data.shape).squeeze(2))
 			m.bias.data.add_(n.sample(m.bias.data.shape).squeeze(1))
-
 
 	min_count = 0
 	for i in tqdm(range(SAMPLE)):
@@ -160,15 +161,15 @@ for exp in range(EXPERIMENTS):
 		if m_loss > test_loss: 
 			min_count = min_count + 1
 
-
 	print('(min ratio, loss, eq_count): ({},{})'.format(min_count/SAMPLE, test_loss))
 	min_ratio.append(min_count/SAMPLE)
 	min_loss.append(test_loss)
 	# plot()
 
+
 plt.plot(min_ratio, min_loss, 'ro')
-plt.xlim(-0.01,0.65)
-plt.ylim(-0.01,0.2)
+plt.xlim(-0.01, max(min_ratio)+0.02)
+plt.ylim(-0.01, 0.2)
 # plt.margins(0.5, tight=None)
 plt.title('STD of noise: '+ str(NOISE_STD))
 plt.xlabel('min ratio')
