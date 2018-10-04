@@ -12,13 +12,14 @@ import sys
 import math
 
 def func(arr):
-	return np.sin(5*np.pi*(arr+0.1))/(5*np.pi*(arr+0.1))+10
-	# return np.exp(np.sin(40*arr))*np.log(arr+1)
+	# return 0.5*np.sin(arr)
+	# return np.sin(5*np.pi*(arr+0.1))/(5*np.pi*(arr+0.1))+10
+	return np.exp(np.sin(40*arr))*np.log(arr+1) / 10
 	# return np.sin(3*np.pi*arr)+np.sin(4*np.pi*arr)
 
 # hyper parameters
 TRAIN_SIZE = 10000
-BATCH_SIZE = 1000
+BATCH_SIZE = 100
 EPOCHS = 30
 SAMPLE = 200
 NOISE_STD = 1e-4
@@ -29,9 +30,13 @@ min_ratio, min_loss = [], []
 
 for exp in range(EXPERIMENTS):
 	model = nn.Sequential(
-				nn.Linear(1, 20),
+				nn.Linear(1, 4),
 				nn.ReLU(),
-				nn.Linear(20, 1)
+				nn.Linear(4, 9),
+				nn.ReLU(),
+				nn.Linear(9, 4),
+				nn.ReLU(),
+				nn.Linear(4, 1)
 			)
 
 	# pack data
@@ -109,6 +114,24 @@ for exp in range(EXPERIMENTS):
 					sys.exit()
 				loss = criterion(output, y)
 				loss.backward()
+
+				for layer in model:
+					if type(layer) == nn.Linear:
+						for row in layer.weight:
+							for elem in row:
+								if elem > 5:
+									elem = 5
+								elif elem < -5:
+									elem = -5
+									# print('WEIGHT WOOOOOOOOOOOOOOOW!!!!')
+						for elem in layer.bias:
+							if elem > 5:
+								elem = 5
+							elif elem < -5:
+								elem = -5
+								# print('WEIGHT WOOOOOOOOOOOOOOOW!!!!')					
+
+				# print(model[4].weight.grad)
 				# print('({}) loss:{}'.format(output, loss))
 				# print('=================================')
 				return loss
