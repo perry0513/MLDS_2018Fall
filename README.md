@@ -72,6 +72,7 @@
 
 ## HW1-2
 ### Visualize the optimization process
+![](readme_src/hw1-2/visualize.png)
 ### Observe gradient norm during training
 ### What happens when gradient is almost zero
 ### Visualize the error surface
