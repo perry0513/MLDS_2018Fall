@@ -31,8 +31,8 @@ BATCH_SIZE = 200
 EPOCHS = 1000
 
 def func(arr):
-	#return np.sin(5*np.pi*arr)/(5*np.pi*arr)
-	return np.exp(np.sin(40*arr))*np.log(arr+1)
+	return np.sin(5*np.pi*arr)/(5*np.pi*arr)
+    #return np.exp(np.sin(40*arr))*np.log(arr+1)
 	#return np.sin(3*np.pi*arr)+np.sin(4*np.pi*arr)
 
 model = Net()
@@ -108,7 +108,7 @@ plt.ylabel('grad')
 plt.show()
 
 
-
+'''
 # optim = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
 
 for epoch in range(EPOCHS):
@@ -172,6 +172,6 @@ with torch.no_grad():
 		loss = criterion(output, y)
 		total_loss = total_loss + loss.numpy() / total_step
 	print('Test loss: ', total_loss)
-
+'''
 
 
