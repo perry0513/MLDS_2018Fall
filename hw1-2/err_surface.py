@@ -158,8 +158,8 @@ for epoch in range(EPOCH_LFBGS):
 				if type(layer) == nn.Linear:
 					params = torch.cat((params, layer.weight.view(1,-1)),1)
 					params = torch.cat((params, layer.bias.view(1,-1)),1)
-			params_hist_around = torch.cat((params_hist_around, params),0)
-			params_loss_hist_around.append(m_loss)
+			params_hist = torch.cat((params_hist_around, params),0)
+			params_loss_hist.append(m_loss)
 
 		print ('Epoch [{}/{}] |\tStep [{}/{}] |\t\tLoss: {:.6f}' 
                .format(epoch+1, EPOCH_LFBGS, i+1, total_step, loss.item()))
@@ -188,7 +188,26 @@ X = TSNE(n_components=2).fit_transform(params_hist.detach())
 X = np.transpose(X)
 x_plot = X[0]
 y_plot = X[1]
-plt.scatter(x_plot,y_plot,s=3)
-for i,(j,k) in enumerate(zip(x_plot,y_plot)):
-	plt.annotate("%.6f"%params_loss_hist[i],xy=(j,k),fontsize=8,color='b')
+plt.scatter(x_plot,y_plot,c=np.array(params_loss_hist)/np.amax(params_loss_hist.detach.numpy())*100,s=10)
+# for i,(j,k) in enumerate(zip(x_plot,y_plot)):
+	#if np.abs(params_loss_hist[i] - )
+	# plt.annotate("%.6f"%params_loss_hist[i],xy=(j,k),fontsize=8,color='b')
 plt.show()
+
+
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib import cm
+
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+c='r'
+m='o'
+x = x_plot
+y = y_plot
+X,Y = np.meshgrid(x, y)
+#R = np.sqrt(X**2 + Y**2)
+Z = loss_hist
+
+ax.plot_surface(X, Y, Z, cmap=cm.coolwarm)
+plt.show()
+
