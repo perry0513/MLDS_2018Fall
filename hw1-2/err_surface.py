@@ -23,7 +23,7 @@ def func(arr):
 # hyper parameters
 TRAIN_SIZE = 10000
 BATCH_SIZE = 100
-EPOCHS = 30
+EPOCHS = 20
 SAMPLE = 200
 NOISE_STD = 1e-4
 EPOCH_LFBGS = 2	# dangerous if too big
