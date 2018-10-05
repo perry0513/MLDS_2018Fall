@@ -28,6 +28,10 @@
     $ python sim_func.py 2
 #### [Train on Actual Task](##train-on-actual-task)
     $ python cnn.py
+#### [Visualize the optimization process](#visualize-the-optimization-process)
+    $ python pca.py
+#### [What happens when gradient is almost zero](#what-happens-when-gradient-is-almost-zero)
+    $ python min_ratio.py
 
 ## HW1-1    
 ### Function Simulation
