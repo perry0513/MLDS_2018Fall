@@ -22,11 +22,11 @@ def func(arr):
 
 # hyper parameters
 TRAIN_SIZE = 10000
-BATCH_SIZE = 100
-EPOCHS = 20
+BATCH_SIZE = 5000
+EPOCHS = 30
 SAMPLE = 200
 NOISE_STD = 1e-4
-EPOCH_LFBGS = 2	# dangerous if too big
+EPOCH_LFBGS = 1	# dangerous if too big
 MAX_GRAD = 5.0
 
 
@@ -84,7 +84,7 @@ for epoch in range(EPOCHS):
 		loss.backward()
 		optimizer.step()
 
-		if (i+1) % 100 == 0:
+		if (i+1) % 10 == 0:
 			print ('Epoch [{}/{}] |\tStep [{}/{}] |\t\tLoss: {:.6f} |\t grad_norm: {:.5f}' 
                    .format(epoch+1, EPOCHS, i+1, total_step, loss.item(), norm))			
 
@@ -96,7 +96,7 @@ for epoch in range(EPOCHS):
 optimizer = optim.LBFGS(model.parameters(), lr=1)
 params_hist = torch.Tensor()
 params_loss_hist = []
-params_hist_around = []
+params_hist_around = torch.Tensor()
 params_loss_hist_around = []
 for epoch in range(EPOCH_LFBGS):
 	for i, (x, y) in enumerate(train_loader):
@@ -126,42 +126,57 @@ for epoch in range(EPOCH_LFBGS):
 
 		loss = optimizer.step(closure)
 
-	
+		# record model and loss
+		params = torch.Tensor()
+		for layer in model:
+			if type(layer) == nn.Linear:
+				params = torch.cat((params, layer.weight.view(1,-1)),1)
+				params = torch.cat((params, layer.bias.view(1,-1)),1)
+		params_hist = torch.cat((params_hist, params),0)
+		params_loss_hist.append(loss)
 
+
+		# sample points around original model and calculate loss
+		n = torch.distributions.Normal(torch.Tensor([0.]), torch.Tensor([NOISE_STD]))
+		def add_noise(m):
+			if type(m) == nn.Linear:
+				# n.sample will add an extra dim(?), so squeeze
+				m.weight.data.add_(n.sample(m.weight.data.shape).squeeze(2))
+				m.bias.data.add_(n.sample(m.bias.data.shape).squeeze(1))
+
+		for i in tqdm(range(SAMPLE)):
+			# deep copy model
+			model_cp = copy.deepcopy(model)
+			# add noise to copied model
+			model_cp.apply(add_noise)
+
+			m_loss = test(model_cp, total_step)
+
+			params = torch.Tensor()
+
+			for layer in model:
+				if type(layer) == nn.Linear:
+					params = torch.cat((params, layer.weight.view(1,-1)),1)
+					params = torch.cat((params, layer.bias.view(1,-1)),1)
+			params_hist_around = torch.cat((params_hist_around, params),0)
+			params_loss_hist_around.append(m_loss)
 
 		print ('Epoch [{}/{}] |\tStep [{}/{}] |\t\tLoss: {:.6f}' 
                .format(epoch+1, EPOCH_LFBGS, i+1, total_step, loss.item()))
 			
 
-	params = torch.Tensor()
-	for p in model.parameters():
-		params = torch.cat((params,p.view(1,-1)),1)
-	params_hist = torch.cat((params_hist,params),0)
-	params_loss_hist.append(loss)
+		
 
-	# sample 200 points
-	n = torch.distributions.Normal(torch.Tensor([0.]), torch.Tensor([NOISE_STD]))
+	# for p in model.parameters():
+	# 	params = torch.cat((params,p.view(1,-1)),1)
+	# params_hist = torch.cat((params_hist,params),0)
+	# params_loss_hist.append(loss)
 
-	# add noise to parameters
-	def add_noise(m):
-		if type(m) == nn.Linear:
-			# n.sample will add an extra dim(?), so squeeze
-			m.weight.data.add_(n.sample(m.weight.data.shape).squeeze(2))
-			m.bias.data.add_(n.sample(m.bias.data.shape).squeeze(1))
-
-	for i in tqdm(range(SAMPLE)):
-		# deep copy model
-		model_cp = copy.deepcopy(model)
-		# add noise to copied model
-		model_cp.apply(add_noise)
-
-		m_loss = test(model_cp, total_step)
-
-		params = torch.Tensor()
-		for p in model_cp.parameters():
-			params = torch.cat((params,p.view(1,-1)),1)
-		params_hist_around = torch.cat((params_hist,params),0)
-		params_loss_hist_around.append(loss)
+		# params = torch.Tensor()
+		# for p in model_cp.parameters():
+		# 	params = torch.cat((params,p.view(1,-1)),1)
+		# params_hist_around = torch.cat((params_hist,params),0)
+		# params_loss_hist_around.append(loss)
 	loss_hist.append(loss)
 
 print(loss_hist[-10:])
