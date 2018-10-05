@@ -93,5 +93,4 @@
 #### Conclusion
     When we  start training on gradient norm, there will be a jump on both loss and norm.
     When train with complicate function, result can get worse when minimizing gradient norm.
-    exp(.sin(40*x))*log(x+1)
 ### Visualize the error surface
