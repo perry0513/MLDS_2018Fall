@@ -22,7 +22,7 @@ def func(arr):
 
 # hyper parameters
 TRAIN_SIZE = 10000
-BATCH_SIZE = 5000
+BATCH_SIZE = 1000
 EPOCHS = 30
 SAMPLE = 200
 NOISE_STD = 1e-4
@@ -184,7 +184,6 @@ print(loss_hist[-10:])
 
 
 # Plot
-print (params_hist.shape)
 X = TSNE(n_components=2).fit_transform(params_hist.detach())
 X = np.transpose(X)
 x_plot = X[0]
