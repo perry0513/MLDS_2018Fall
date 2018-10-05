@@ -14,13 +14,18 @@
 * [HW1-2](#HW1-2)
     * [Visualize the optimization process](#visualize-the-optimization-process)
     * [Observe gradient norm during training](#observe-gradient-norm-during-training)
+        * [Conclusion](#observe-conclusion)
     * [What happens when gradient is almost zero](#what-happens-when-gradient-is-almost-zero)
+        * [Conclusion](#zero-conclusion)
     * [Visualize the error surface](#visualize-the-error-surface)
 
 ## Getting Started
 ### Prerequisites
     $ pip install tensorflow
     $ pip install keras
+#### Pytorch
+    go to https://pytorch.org/
+    choose your operting system and install pytorch
 ### Installing
 #### [Function Simulation](##function-simulation)
 ##### 1 for the first function, 2 for the second
@@ -74,5 +79,18 @@
 ### Visualize the optimization process
 ![](readme_src/hw1-2/visualize.png)
 ### Observe gradient norm during training
+![](readme_src/hw1-2/observe-gradient.png)
+<a id="observe-conclusion"></a>
+
+#### Conclusion
+    Norm of gradient lowers together obviously.
+    However when it comes to complicated functions, such as exp(.sin(40*x))*log(x+1), it is hard to master gradient norm's behavior. (but it still tends to decrease)
 ### What happens when gradient is almost zero
+![](readme_src/hw1-2/zero-gradient_1.png)
+![](readme_src/hw1-2/zero-gradient_2.png)
+<a id="zero-conclusion"></a>
+
+#### Conclusion
+    When we  start training on gradient norm, there will be a jump on both loss and norm.
+    When train with complicate function, result can get worse when minimizing gradient norm.
 ### Visualize the error surface
