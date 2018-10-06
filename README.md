@@ -35,8 +35,12 @@
     $ python cnn.py
 #### [Visualize the optimization process](#visualize-the-optimization-process)
     $ python pca.py
+#### [Observe gradient norm during training](#observe-gradient-norm-during-training)
+	$ python min_ratio_grad.py
 #### [What happens when gradient is almost zero](#what-happens-when-gradient-is-almost-zero)
     $ python min_ratio.py
+#### [Visualize the error surface](#visualize-the-error-surface)
+	$ python err_surface.py
 
 ## HW1-1    
 ### Function Simulation
