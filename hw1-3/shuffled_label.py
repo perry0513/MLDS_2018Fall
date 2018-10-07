@@ -32,7 +32,7 @@ def load_data(train_size, batch_size):
 # Parameters
 train_size = 10000
 epochs = 200
-batch_size = 100
+batch_size = 100	# train_size % batch_size == 0
 total_step = train_size//batch_size
 display_step = 50
 
@@ -62,8 +62,6 @@ biases = {
 }
 
 
-train_data, test_data = load_data(train_size, batch_size)
-
 # Create model
 def neural_net(x):
     # Hidden fully connected layer with 256 neurons
@@ -92,6 +90,9 @@ accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 # Initialize the variables (i.e. assign their default value)
 init = tf.global_variables_initializer()
 
+train_data, test_data = load_data(train_size, batch_size)
+dataset = list(zip(train_data, test_data))
+
 train_loss_hist = []
 test_loss_hist = []
 # Start training
@@ -101,44 +102,27 @@ with tf.Session() as sess:
 
 	for epoch in range(epochs):
 		np.random.shuffle(train_data)
-		avg_loss = 0
-		for i, (batch_x, batch_y) in enumerate(train_data):
+		avg_train_loss, avg_test_loss = 0, 0
+		for i, ((batch_x_train, batch_y_train), (batch_x_test, batch_y_test)) in enumerate(dataset):
 			# Run optimization op (backprop)
-			sess.run(train_op, feed_dict={ X: batch_x, Y: batch_y })
+			_, train_loss, acc = sess.run([train_op, loss_op, accuracy], feed_dict={ X: batch_x_train, Y: batch_y_train })
+			test_loss = sess.run(loss_op, feed_dict={ X: batch_x_test, Y: batch_y_test })
+
+			avg_train_loss += train_loss/total_step
+			avg_test_loss += test_loss/total_step
+
 			if (i+1) % display_step == 0:
 				# Calculate batch loss and accuracy
-				loss, acc = sess.run([loss_op, accuracy], feed_dict={ X: batch_x, Y: batch_y })
-				print("Epoch [{:>3}/{:>3}] | Step [{:>3}/{:>3}] | Loss: {:.6f} \t| Acc: {:.6f}"
-					  .format(epoch+1, epochs, i+1, total_step, loss, acc) )
+				print("Epoch [{:>3}/{:>3}] | Step [{:>3}/{:>3}] | Train Loss: {:.6f} \t| Acc: {:.6f} \t| Test Loss: {:.6f}"
+					  .format(epoch+1, epochs, i+1, total_step, train_loss, acc, test_loss) )
 
-				avg_loss += loss/(total_step//display_step)
-
-		train_loss_hist.append(avg_loss)
-
-	print("Optimization Finished!")
-
-    # Calculate accuracy for MNIST test images
-    # print("Testing Accuracy:", \
-    #     sess.run(accuracy, feed_dict={X: mnist.test.images,
-    #                                   Y: mnist.test.labels}))
-	for epoch in range(epochs):
-		np.random.shuffle(train_data)
-		avg_loss = 0
-		for i, (batch_x, batch_y) in enumerate(test_data):
-			if (i+1) % display_step == 0:
-				loss, acc = sess.run([loss_op, accuracy], feed_dict={ X: batch_x, Y: batch_y })
-				print("Epoch [{:>3}/{:>3}] | Step [{:>3}/{:>3}] | Loss: {:.6f} \t| Acc: {:.6f}"
-					  .format(epoch+1, epochs, i+1, total_step, loss, acc) )
-
-				avg_loss += loss/(total_step//display_step)
-
-		test_loss_hist.append(avg_loss)
-
+		train_loss_hist.append(avg_train_loss)
+		test_loss_hist.append(avg_test_loss)
 
 
 plt.plot(train_loss_hist, label='train')
 plt.plot(test_loss_hist, label='test')
-# plt.plot
+plt.title('shuffled label')
 plt.legend()
 plt.show()
 
