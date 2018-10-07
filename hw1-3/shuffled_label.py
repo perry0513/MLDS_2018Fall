@@ -3,6 +3,7 @@ from tqdm import tqdm
 import tensorflow as tf
 import tensorflow.keras.utils as np_utils
 import tensorflow.keras.datasets.mnist as mnist
+from matplotlib import pyplot as plt
 
 def load_data(train_size, batch_size):
 	(x_train, y_train), (x_test, y_test) = mnist.load_data()
@@ -32,6 +33,7 @@ def load_data(train_size, batch_size):
 train_size = 10000
 epochs = 200
 batch_size = 100
+total_step = train_size//batch_size
 display_step = 50
 
 # Network Parameters
@@ -90,12 +92,16 @@ accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 # Initialize the variables (i.e. assign their default value)
 init = tf.global_variables_initializer()
 
+train_loss_hist = []
+test_loss_hist = []
 # Start training
 with tf.Session() as sess:
     # Run the initializer
 	sess.run(init)
 
 	for epoch in range(epochs):
+		np.random.shuffle(train_data)
+		avg_loss = 0
 		for i, (batch_x, batch_y) in enumerate(train_data):
 			# Run optimization op (backprop)
 			sess.run(train_op, feed_dict={ X: batch_x, Y: batch_y })
@@ -103,7 +109,11 @@ with tf.Session() as sess:
 				# Calculate batch loss and accuracy
 				loss, acc = sess.run([loss_op, accuracy], feed_dict={ X: batch_x, Y: batch_y })
 				print("Epoch [{:>3}/{:>3}] | Step [{:>3}/{:>3}] | Loss: {:.6f} \t| Acc: {:.6f}"
-					  .format(epoch+1, epochs, i+1, train_size//batch_size, loss, acc) )
+					  .format(epoch+1, epochs, i+1, total_step, loss, acc) )
+
+				avg_loss += loss/(total_step//display_step)
+
+		train_loss_hist.append(avg_loss)
 
 	print("Optimization Finished!")
 
@@ -111,5 +121,24 @@ with tf.Session() as sess:
     # print("Testing Accuracy:", \
     #     sess.run(accuracy, feed_dict={X: mnist.test.images,
     #                                   Y: mnist.test.labels}))
+	for epoch in range(epochs):
+		np.random.shuffle(train_data)
+		avg_loss = 0
+		for i, (batch_x, batch_y) in enumerate(test_data):
+			if (i+1) % display_step == 0:
+				loss, acc = sess.run([loss_op, accuracy], feed_dict={ X: batch_x, Y: batch_y })
+				print("Epoch [{:>3}/{:>3}] | Step [{:>3}/{:>3}] | Loss: {:.6f} \t| Acc: {:.6f}"
+					  .format(epoch+1, epochs, i+1, total_step, loss, acc) )
 
+				avg_loss += loss/(total_step//display_step)
+
+		test_loss_hist.append(avg_loss)
+
+
+
+plt.plot(train_loss_hist, label='train')
+plt.plot(test_loss_hist, label='test')
+# plt.plot
+plt.legend()
+plt.show()
 
