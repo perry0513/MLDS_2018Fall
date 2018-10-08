@@ -120,18 +120,10 @@ for i in range(2):
 					print("Epoch [{:>3}/{:>3}] | Step [{:>3}/{:>3}] | Train Loss: {:.6f} \t| Acc: {:.6f}"
 						  .format(epoch+1, epochs, j+1, train_size/batch_size[i], train_loss/batch_size[i], acc) )
 
-		# print(i)
-		# print(sess.run(weights[i][0]))
-		# print('########')
-
-
+		# record parameters, used to initialize inter_weights & inter_biases
 		trained_model.append([ sess.run(weights[i]), sess.run(biases[i]) ])
 
-# print(np.array(trained_model[0][0][0]).shape)
-# 
-# print(np.array(trained_model[0][0][0][0]) * 0.5 + np.array(trained_model[1][0][0][0]) * 0.5)
 
-# print(trained_model[0][0][0])
 
 for alpha in alpha_list:
 
@@ -176,20 +168,11 @@ for alpha in alpha_list:
 	train_data, test_data = load_data(train_size, batch_size[0]) # batch_size = 100
 	dataset = list(zip(train_data, test_data))
 
-	# assign_op = inter_weights['h1'].assign (tf.constant(trained_model[0][0])*0.5)
-
 	# Start testing
 	with tf.Session() as sess:
-		# print(sess.run(tf.report_uninitialized_variables()))
-
 		sess.run(init)
 
-		# print(type(np.array(trained_model[0][0])))
-		# print(sess.run(inter_weights['h1']))
-		# sess.run(assign_op)
-		# print('hi')
-		# print(sess.run(inter_weights['h1']))
-
+		# Test model
 		avg_train_loss, avg_train_acc = 0, 0
 		avg_test_loss, avg_test_acc = 0, 0
 		for i, ((batch_x_train, batch_y_train), (batch_x_test, batch_y_test)) in enumerate(dataset):
