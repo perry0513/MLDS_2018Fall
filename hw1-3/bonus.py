@@ -44,6 +44,10 @@ num_classes = 10 # MNIST total classes (0-9 digits)
 X = tf.placeholder("float", [None, num_input])
 Y = tf.placeholder("float", [None, num_classes])
 
+weights = {
+
+}
+
 # Create model
 def neural_net(x):
 	x_image = tf.reshape(x, [-1, 28, 28, 1])
@@ -111,6 +115,9 @@ dataset = list(zip(train_data, test_data))
 
 train_loss_hist = []
 test_loss_hist = []
+
+print (tf.trainable_variables())
+
 # Start training
 with tf.Session() as sess:
     # Run the initializer

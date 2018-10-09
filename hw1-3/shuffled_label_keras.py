@@ -43,14 +43,14 @@ model.add(Dense(units=10,kernel_initializer='normal',activation='softmax'))
 model.compile(loss='categorical_crossentropy',optimizer='adam',metrics=['accuracy'])
 
 # model fitting with training set
-train = model.fit(x=x_train,y=y_train,validation_split=0.2,epochs=200,batch_size=100,verbose=2)
+train = model.fit(x=x_train,y=y_train,validation_split=0.2,epochs=100,batch_size=100,verbose=2)
 
 # display training history
 plt.subplot(1,1,1)
-plt.title('Train History')
+plt.title('Shuffled Label')
 plt.plot(train.history['loss'],label='train')
 plt.plot(train.history['val_loss'],label='test')
-plt.xlabel('Epoch')
+plt.xlabel('Epochs')
 plt.ylabel('Loss')
 plt.legend()
 plt.show()
