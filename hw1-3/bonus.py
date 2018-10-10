@@ -102,7 +102,10 @@ correct_pred = tf.equal(tf.argmax(prediction, 1), tf.argmax(Y, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
 # Calculate Hessian matrix and sharpness
-var_array = tf.reshape(tf.trainable_variables(),[1,-1])
+var_array = []
+for var in tf.trainable_variables():
+	var_array.append(tf.reshape(var,[-1]))
+print (var_array)
 hessian = tf.hessians(loss_op,var_array) / tf.size(loss_op)
 sharpness = 0.5*tf.norm(hessian,2)*e**2 / (1+loss_op)
 
@@ -129,7 +132,7 @@ with tf.Session() as sess:
 			# Run optimization op (backprop)
 			_, train_loss, acc = sess.run([train_op, loss_op, accuracy], feed_dict={ X: batch_x_train, Y: batch_y_train })
 			test_loss = sess.run(loss_op, feed_dict={ X: batch_x_test, Y: batch_y_test })
-
+			
 			avg_train_loss += train_loss/total_step
 			avg_test_loss += test_loss/total_step
 
@@ -137,6 +140,9 @@ with tf.Session() as sess:
 				# Calculate batch loss and accuracy
 				print("Epoch [{:>3}/{:>3}] | Step [{:>3}/{:>3}] | Train Loss: {:.6f} \t| Acc: {:.6f} \t| Test Loss: {:.6f}"
 					  .format(epoch+1, epochs, i+1, total_step, train_loss, acc, test_loss) )
+			if (i+1==total_step) and (epoch+1==epochs):
+				avg_sharpness = sess.run(sharpness, feed_dict={ X: batch_x_test, Y: batch_y_test })
+				print (avg_sharpness)
 
 		train_loss_hist.append(avg_train_loss)
 		test_loss_hist.append(avg_test_loss)
