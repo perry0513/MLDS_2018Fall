@@ -32,21 +32,15 @@ batch_size = 100	# train_size % batch_size == 0
 total_step = train_size//batch_size
 display_step = 50
 keep_prob = 0.5
+e = 1e-4
 
 # Network Parameters
-n_hidden_1 = 256 # 1st layer number of neurons
-n_hidden_2 = 256 # 2nd layer number of neurons
-n_hidden_3 = 256 # 3nd layer number of neurons
 num_input = 784 # MNIST data input (img shape: 28*28)
 num_classes = 10 # MNIST total classes (0-9 digits)
 
 # tf Graph input
 X = tf.placeholder("float", [None, num_input])
 Y = tf.placeholder("float", [None, num_classes])
-
-weights = {
-
-}
 
 # Create model
 def neural_net(x):
@@ -107,6 +101,11 @@ train_op = optimizer.minimize(loss_op)
 correct_pred = tf.equal(tf.argmax(prediction, 1), tf.argmax(Y, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
+# Calculate Hessian matrix and sharpness
+var_array = tf.reshape(tf.trainable_variables(),[1,-1])
+hessian = tf.hessians(loss_op,var_array) / tf.size(loss_op)
+sharpness = 0.5*tf.norm(hessian,2)*e**2 / (1+loss_op)
+
 # Initialize the variables (i.e. assign their default value)
 init = tf.global_variables_initializer()
 
@@ -141,7 +140,6 @@ with tf.Session() as sess:
 
 		train_loss_hist.append(avg_train_loss)
 		test_loss_hist.append(avg_test_loss)
-
 
 plt.plot(train_loss_hist, label='train')
 plt.plot(test_loss_hist, label='test')
