@@ -184,7 +184,6 @@ print(loss_hist[-10:])
 
 
 # Plot
-print (params_hist.shape)
 X = TSNE(n_components=2).fit_transform(params_hist.detach())
 X = np.transpose(X)
 x_plot = X[0]
