@@ -4,6 +4,7 @@ import tensorflow as tf
 import tensorflow.keras.utils as np_utils
 import tensorflow.keras.datasets.mnist as mnist
 from matplotlib import pyplot as plt
+# import PyQt5
 
 def load_data(train_size, batch_size):
 	(x_train, y_train), (x_test, y_test) = mnist.load_data()
@@ -27,7 +28,7 @@ def load_data(train_size, batch_size):
 
 # Parameters
 train_size = 10000
-epochs = 200
+epochs = 10
 batch_size = 100	# train_size % batch_size == 0
 total_step = train_size//batch_size
 display_step = 50
@@ -102,12 +103,12 @@ correct_pred = tf.equal(tf.argmax(prediction, 1), tf.argmax(Y, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
 # Calculate Hessian matrix and sharpness
-var_array = []
-for var in tf.trainable_variables():
-	var_array.append(tf.reshape(var,[-1]))
-print (var_array)
-hessian = tf.hessians(loss_op,var_array) / tf.size(loss_op)
-sharpness = 0.5*tf.norm(hessian,2)*e**2 / (1+loss_op)
+hessian = tf.hessians(loss_op,tf.trainable_variables())
+hessian_arr = []
+for h in hessian:
+	hessian_arr.append(tf.norm(h,2))
+hessian_norm = tf.reduce_max(hessian_arr)
+sharpness = 0.5*tf.norm(hessian_norm,2)*e**2 / (1+loss_op)
 
 # Initialize the variables (i.e. assign their default value)
 init = tf.global_variables_initializer()
@@ -147,6 +148,7 @@ with tf.Session() as sess:
 		train_loss_hist.append(avg_train_loss)
 		test_loss_hist.append(avg_test_loss)
 
+# plt.switch_backend('agg')
 plt.plot(train_loss_hist, label='train')
 plt.plot(test_loss_hist, label='test')
 plt.title('cnn_mnist')
