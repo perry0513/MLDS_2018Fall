@@ -6,7 +6,7 @@ import tensorflow.keras.datasets.mnist as mnist
 from matplotlib import pyplot as plt
 # import PyQt5
 
-def load_data(train_size, batch_size):
+def load_data(train_size):
 	(x_train, y_train), (x_test, y_test) = mnist.load_data()
 	x_train = x_train[0:train_size]
 	y_train = y_train[0:train_size]
@@ -20,16 +20,20 @@ def load_data(train_size, batch_size):
 	y_train = np_utils.to_categorical(y_train, 10)
 	y_test = np_utils.to_categorical(y_test, 10)
 
-	# batched
-	train_data = list(zip( np.split(x_train, train_size/batch_size), np.split(y_train, train_size/batch_size) ))
-	test_data = list(zip( np.split(x_test, train_size/batch_size), np.split(y_test, train_size/batch_size) ))
+	return (x_train, y_train), (x_test, y_test)
 
-	return train_data, test_data
+def shuffle_and_zip(x, y, ts, bs):
+	zipped = list(zip(x,y))
+	np.random.shuffle(zipped)
+	x, y = [ np.array(t) for t in zip(*zipped) ]
+	mod_ts = ts//bs * bs
+	return list(zip( np.split(x[:mod_ts], mod_ts//bs), np.split(y[:mod_ts], mod_ts//bs) ))
 
 # Parameters
 train_size = 10000
-epochs = 10
-batch_size_list = [10,20,40,50,80,100,200,250,400,500,1000,1250,2000]	# train_size % batch_size == 0
+test_size  = 10000
+epochs = 2000
+batch_size_list = range(50,2001,50)
 display_step = 50
 keep_prob = 0.5
 e = 1e-4
@@ -112,12 +116,16 @@ sharpness = 0.5*tf.norm(hessian_norm,2)*e**2 / (1+loss_op)
 # Initialize the variables (i.e. assign their default value)
 init = tf.global_variables_initializer()
 
+# Load training data
+(x_train, y_train), (x_test, y_test) = load_data(train_size)
+
 # Start training
 sharpness_hist = []
 train_loss_hist = []
 test_loss_hist = []
 for batch_size in batch_size_list:
-	train_data, test_data = load_data(train_size, batch_size)
+	train_data = shuffle_and_zip(x_train, y_train, train_size, batch_size)
+	test_data = shuffle_and_zip(x_test, y_test, test_size, batch_size)
 	dataset = list(zip(train_data, test_data))
 	total_step = train_size//batch_size
 
