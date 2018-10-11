@@ -5,7 +5,7 @@ import tensorflow.keras.utils as np_utils
 import tensorflow.keras.datasets.mnist as mnist
 from matplotlib import pyplot as plt
 
-def load_data(train_size, batch_size, batched):
+def load_data(train_size):
 	(x_train, y_train), (x_test, y_test) = mnist.load_data()
 	x_train = x_train[0:train_size]
 	y_train = y_train[0:train_size]
@@ -19,21 +19,22 @@ def load_data(train_size, batch_size, batched):
 	y_train = np_utils.to_categorical(y_train, 10)
 	y_test = np_utils.to_categorical(y_test, 10)
 
-	if batched == False:
-		return (x_train, y_train), (x_test, y_test)
+	return (x_train, y_train), (x_test, y_test)
 
-	# batched (train_size % batch_size == 0)
-	train_data = list(zip( np.split(x_train, train_size/batch_size), np.split(y_train, train_size/batch_size) ))
-	test_data  = list(zip( np.split(x_test , train_size/batch_size), np.split(y_test , train_size/batch_size) ))
 
-	return train_data, test_data
+def shuffle_and_zip(x, y, ts, bs):
+	zipped = list(zip(x,y))
+	np.random.shuffle(zipped)
+	x, y = [ np.array(t) for t in zip(*zipped) ]
+	mod_ts = ts//bs * bs
+	return list(zip( np.split(x[:mod_ts], mod_ts//bs), np.split(y[:mod_ts], mod_ts//bs) ))
 
 # Parameters
 train_size = 10000
-epochs = 200
+epochs = 10
 batch_size = [ 100, 1000 ]	# train_size % batch_size == 0
 display_step = 10
-alpha_list = np.arange(-1,2,0.05)
+alpha_list = np.arange(-1,2,1.5)
 
 # Network Parameters
 n_hidden_1 = 256 # 1st layer number of neurons
@@ -87,6 +88,9 @@ inter_train_loss, inter_train_acc = [],[]
 inter_test_loss, inter_test_acc = [],[]
 trained_model = []
 
+# Load training data
+(x_train, y_train), (x_test, y_test) = load_data(train_size)
+
 for i in range(2):
 	# Construct model
 	logits = neural_net(X, i)
@@ -104,16 +108,13 @@ for i in range(2):
 	# Initialize the variables (i.e. assign their default value)
 	init = tf.global_variables_initializer()
 
-	# load training data
-	train_data, test_data = load_data(train_size, batch_size[i], True)
-
 	# Start training
 	with tf.Session() as sess:
 		sess.run(init)
 
 		for epoch in range(epochs):
 			# shuffle batch
-			np.random.shuffle(train_data)
+			train_data = shuffle_and_zip(x_train, y_train, train_size, batch_size[i])
 			for j, (batch_x_train, batch_y_train) in enumerate(train_data):
 				# Run optimization op (backprop)
 				_, train_loss, acc = sess.run([train_op, loss_op, accuracy], feed_dict={ X: batch_x_train, Y: batch_y_train })
@@ -171,7 +172,6 @@ for alpha in tqdm(alpha_list):
 	with tf.Session() as sess:
 		sess.run(init)
 		# Calculate training/testing loss/acc
-		(x_train, y_train), (x_test, y_test) = load_data(train_size, 0, False)
 		train_loss, train_acc = sess.run([loss_op, accuracy], feed_dict={ X: x_train, Y: y_train })
 		test_loss, test_acc = sess.run([loss_op, accuracy], feed_dict={ X: x_test, Y: y_test })
 

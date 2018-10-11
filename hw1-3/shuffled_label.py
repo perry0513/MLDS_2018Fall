@@ -4,7 +4,7 @@ import tensorflow.keras.utils as np_utils
 import tensorflow.keras.datasets.mnist as mnist
 from matplotlib import pyplot as plt
 
-def load_data(train_size, batch_size):
+def load_data(train_size):
 	(x_train, y_train), (x_test, y_test) = mnist.load_data()
 	x_train = x_train[0:train_size]
 	y_train = y_train[0:train_size]
@@ -23,6 +23,13 @@ def load_data(train_size, batch_size):
 	y_test = np_utils.to_categorical(y_test, 10)
 
 	return (x_train, y_train), (x_test, y_test)
+
+def shuffle_and_zip(x, y, ts, bs):
+	zipped = list(zip(x,y))
+	np.random.shuffle(zipped)
+	x, y = [ np.array(t) for t in zip(*zipped) ]
+	mod_ts = ts//bs * bs
+	return list(zip( np.split(x[:mod_ts], mod_ts//bs), np.split(y[:mod_ts], mod_ts//bs) ))
 
 
 # Parameters
@@ -86,8 +93,7 @@ accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 init = tf.global_variables_initializer()
 
 # load data, zip training data into "train_data"
-(x_train, y_train), (x_test, y_test) = load_data(train_size, batch_size)
-train_data = list(zip( np.split(x_train, train_size/batch_size), np.split(y_train, train_size/batch_size) ))
+(x_train, y_train), (x_test, y_test) = load_data(train_size)
 
 train_loss_hist = []
 test_loss_hist = []
@@ -97,7 +103,7 @@ with tf.Session() as sess:
 
 	for epoch in range(epochs):
 		# shuffle batch
-		np.random.shuffle(train_data)
+		train_data = shuffle_and_zip(x_train, y_train, train_size, batch_size)
 		for batch_x_train, batch_y_train in train_data:
 			# Run optimization op (backprop)
 			 sess.run(train_op, feed_dict={ X: batch_x_train, Y: batch_y_train })
