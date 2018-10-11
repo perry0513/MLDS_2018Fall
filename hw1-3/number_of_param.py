@@ -44,7 +44,7 @@ def add_params(model, layers):
 
 	for x in range(layers):
 		model.add(Dense(units = units_per_layer))
-		model.add(Activation('sigmoid'))
+		model.add(Activation('relu'))
 
 	model.add(Dense(units = 10))
 	model.add(Activation('softmax'))
@@ -58,13 +58,15 @@ def reset_weights(model):
         if hasattr(layer, 'kernel_initializer'):
             layer.kernel.initializer.run(session=session)
 '''
-
+def slightly_increase(x):
+	x = x * 1.2
+	return x
 
 #Parameters
-Epochs = 30
+Epochs = 20
 Batch_size = 100
 units_per_layer = 1
-units_per_layer_increase = 10
+units_per_layer_increase = 1
 layers = 3
 t = 100
 
@@ -76,20 +78,23 @@ temp = []
 #1_Define a set of function
 model = Sequential()
 model.add( Dense( input_dim = 28*28, units = 10))
-model.add( Activation('sigmoid'))
+model.add( Activation('relu'))
 Wsave = model.get_weights()
 for x in range(layers):
 	model.add(Dense(units = units_per_layer))
-	model.add(Activation('sigmoid'))
+	model.add(Activation('relu'))
 model.add( Dense(units = 10))
 model.add( Activation('softmax'))
 print(model.summary())
 
 #initial_weights = model.get_weights()
+#l = np.log(3.1)
 
 for i in range(t):
 	print("\n\n=======================================================\nModel: ", i+1," / ",t,'\n')
 	units_per_layer += units_per_layer_increase
+#	print("\n!!!!!!!!", units_per_layer_increase)
+	units_per_layer_increase =  units_per_layer_increase + int((i**1.15)/10 )
 	model = add_params(model, layers)
 	param_hist.append(model.count_params())
 
@@ -122,9 +127,12 @@ plt.xlabel('Epoch')
 plt.show()
 
 #plt.plot(param_hist,temp,'go')
-plt.plot(param_hist,'o')
-plt.show()
 '''
+plt.plot(param_hist,'ro')
+plt.show()
+
+
+
 # Plot training & validation loss values
 C1 = '#EE7700'
 C2 = '#009FCC'
