@@ -4,6 +4,7 @@ import tensorflow as tf
 import tensorflow.keras.utils as np_utils
 import tensorflow.keras.datasets.mnist as mnist
 from matplotlib import pyplot as plt
+# import PyQt5
 
 def load_data(train_size, batch_size):
 	(x_train, y_train), (x_test, y_test) = mnist.load_data()
@@ -27,9 +28,8 @@ def load_data(train_size, batch_size):
 
 # Parameters
 train_size = 10000
-epochs = 200
-batch_size = 100	# train_size % batch_size == 0
-total_step = train_size//batch_size
+epochs = 10
+batch_size_list = [10,20,40,50,80,100,200,250,400,500,1000,1250,2000]	# train_size % batch_size == 0
 display_step = 50
 keep_prob = 0.5
 e = 1e-4
@@ -102,55 +102,68 @@ correct_pred = tf.equal(tf.argmax(prediction, 1), tf.argmax(Y, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
 # Calculate Hessian matrix and sharpness
-var_array = []
-for var in tf.trainable_variables():
-	var_array.append(tf.reshape(var,[-1]))
-print (var_array)
-hessian = tf.hessians(loss_op,var_array) / tf.size(loss_op)
-sharpness = 0.5*tf.norm(hessian,2)*e**2 / (1+loss_op)
+hessian = tf.hessians(loss_op,tf.trainable_variables())
+hessian_arr = []
+for h in hessian:
+	hessian_arr.append(tf.norm(h,2))
+hessian_norm = tf.reduce_max(hessian_arr)
+sharpness = 0.5*tf.norm(hessian_norm,2)*e**2 / (1+loss_op)
 
 # Initialize the variables (i.e. assign their default value)
 init = tf.global_variables_initializer()
 
-train_data, test_data = load_data(train_size, batch_size)
-dataset = list(zip(train_data, test_data))
-
+# Start training
+sharpness_hist = []
 train_loss_hist = []
 test_loss_hist = []
+for batch_size in batch_size_list:
+	train_data, test_data = load_data(train_size, batch_size)
+	dataset = list(zip(train_data, test_data))
+	total_step = train_size//batch_size
 
-print (tf.trainable_variables())
+	with tf.Session() as sess:
+		# Run the initializer
+		sess.run(init)
 
-# Start training
-with tf.Session() as sess:
-    # Run the initializer
-	sess.run(init)
+		for epoch in range(epochs):
+			np.random.shuffle(train_data)
+			avg_train_loss, avg_test_loss = 0, 0
+			for i, ((batch_x_train, batch_y_train), (batch_x_test, batch_y_test)) in enumerate(dataset):
+				# Run optimization op (backprop)
+				_, train_loss = sess.run([train_op, loss_op], feed_dict={ X: batch_x_train, Y: batch_y_train })
+				test_loss = sess.run(loss_op, feed_dict={ X: batch_x_test, Y: batch_y_test })
+				
+				avg_train_loss += train_loss/total_step
+				avg_test_loss += test_loss/total_step
 
-	for epoch in range(epochs):
-		np.random.shuffle(train_data)
-		avg_train_loss, avg_test_loss = 0, 0
-		for i, ((batch_x_train, batch_y_train), (batch_x_test, batch_y_test)) in enumerate(dataset):
-			# Run optimization op (backprop)
-			_, train_loss, acc = sess.run([train_op, loss_op, accuracy], feed_dict={ X: batch_x_train, Y: batch_y_train })
-			test_loss = sess.run(loss_op, feed_dict={ X: batch_x_test, Y: batch_y_test })
-			
-			avg_train_loss += train_loss/total_step
-			avg_test_loss += test_loss/total_step
+				if (i+1==total_step) and (epoch+1==epochs):
+					avg_sharpness = sess.run(sharpness, feed_dict={ X: batch_x_train, Y: batch_y_train })
+					print (avg_sharpness)
+					sharpness_hist.append(avg_sharpness)
+					train_loss_hist.append(avg_train_loss)
+					test_loss_hist.append(avg_test_loss)
 
-			if (i+1) % display_step == 0:
-				# Calculate batch loss and accuracy
-				print("Epoch [{:>3}/{:>3}] | Step [{:>3}/{:>3}] | Train Loss: {:.6f} \t| Acc: {:.6f} \t| Test Loss: {:.6f}"
-					  .format(epoch+1, epochs, i+1, total_step, train_loss, acc, test_loss) )
-			if (i+1==total_step) and (epoch+1==epochs):
-				avg_sharpness = sess.run(sharpness, feed_dict={ X: batch_x_test, Y: batch_y_test })
-				print (avg_sharpness)
+# plot
+plt.switch_backend('agg')
+fig, ax1 = plt.subplots()
 
-		train_loss_hist.append(avg_train_loss)
-		test_loss_hist.append(avg_test_loss)
+color = 'tab:blue'
+ax1.set_xscale('log')
+ax1.set_xlabel('batch size (log scale)')
+ax1.set_ylabel('loss', color=color)
+ax1.plot(batch_size_list, train_loss_hist, color=color, label='train')
+ax1.plot(batch_size_list, test_loss_hist, color=color, linestyle='--', label='test')
+ax1.tick_params(axis='y', labelcolor=color)
 
-plt.plot(train_loss_hist, label='train')
-plt.plot(test_loss_hist, label='test')
-plt.title('cnn_mnist')
-plt.yscale('log')
+ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
+
+color = 'tab:red'
+ax2.set_ylabel('sharpness', color=color)  # already handled the x-label with ax1
+ax2.plot(batch_size_list, sharpness_hist, color=color, label='sharpness')
+ax2.tick_params(axis='y', labelcolor=color)
+
+fig.tight_layout()  # otherwise the right y-label is slightly clipped
 plt.legend()
+plt.savefig('./bonus.png')
 plt.show()
 
