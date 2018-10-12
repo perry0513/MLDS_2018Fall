@@ -42,6 +42,18 @@
     $ python pca.py
 #### [What happens when gradient is almost zero](#what-happens-when-gradient-is-almost-zero)
     $ python min_ratio.py
+#### [Can network fit random labels?](#can-network-fit-random-labels)
+	$ python shuffled_label_keras.py
+#### [Number of parameters v.s. Generalization](#number-of-parameters-vs-generalization)
+	$ python number_of_params.py
+#### [Flatness v.s. Generalization](#flatness-vs-generalization)
+#### Part 1
+	$ python inter_model.py
+#### Part 2
+	$ python sensitivity.py
+#### [Flatness v.s. Generalization: Bonus](#flatness-vs-generalization-bonus)
+	$ python bonus.py
+
 
 ## HW1-1    
 ### Function Simulation
@@ -105,8 +117,6 @@
 ![](readme_src/hw1-3/shuffled_label.png)
 #### The more the parameters, the higher the accuracy.
 ![](readme_src/hw1-3/params.png)
-#### Comment on result
-Number of parameters v.s. Generalization
 ## Flatness v.s. Generalization
 #### Part 1
 ![](readme_src/hw1-3/inter_model.png)
