@@ -103,12 +103,22 @@
 ## HW1-3
 ### Can network fit random labels?
 ![](readme_src/hw1-3/shuffled_label.png)
-### Number of parameters v.s. Generalization
+####The more the parameters, the higher the accuracy.
 ![](readme_src/hw1-3/params.png)
-### Flatness v.s. Generalization
+#### Comment on result
+Number of parameters v.s. Generalization
+## Flatness v.s. Generalization
 #### Part 1
 ![](readme_src/hw1-3/inter_model.png)
 #### Part 2
 ![](readme_src/hw1-3/sensitivity.png)
+####Comment on result:
+1. Smaller batch size leads to slightly better result than larger batch size (lower loss)
+2. Smaller batch size leads to flatter minima, which indicates lower sharpness
+3. Model trained with small batch size is less sensitive to change of input
 ### Flatness v.s. Generalization: Bonus
 ![](readme_src/hw1-3/sharpness.png)
+#### Comment on result
+1. It seems like our result is slightly different from what we expected.
+2. We calculate the sharpness with the norm of  tf.hessians, and the hessian is calculated with the average loss in a batch. Perhaps the small batch size leads to less accurate result.
+
