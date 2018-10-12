@@ -18,6 +18,11 @@
     * [What happens when gradient is almost zero](#what-happens-when-gradient-is-almost-zero)
         * [Conclusion](#zero-conclusion)
     * [Visualize the error surface](#visualize-the-error-surface)
+* [HW1-3](#HW1-3)
+	* [Can network fit random labels?](#can-network-fit-random-labels)
+	* [Number of parameters v.s. Generalization](#number-of-parameters-vs-generalization)
+	* [Flatness v.s. Generalization](#flatness-vs-generalization)
+	* [Flatness v.s. Generalization: Bonus](#flatness-vs-generalization-bonus)
 
 ## Getting Started
 ### Prerequisites
@@ -94,3 +99,16 @@
     When we  start training on gradient norm, there will be a jump on both loss and norm.
     When train with complicate function, result can get worse when minimizing gradient norm.
 ### Visualize the error surface
+
+## HW1-3
+### Can network fit random labels?
+![](readme_src/hw1-3/shuffled_label.png)
+### Number of parameters v.s. Generalization
+![](readme_src/hw1-3/params.png)
+### Flatness v.s. Generalization
+#### Part 1
+![](readme_src/hw1-3/inter_model.png)
+#### Part 2
+![](readme_src/hw1-3/sensitivity.png)
+### Flatness v.s. Generalization: Bonus
+![](readme_src/hw1-3/sharpness.png)
