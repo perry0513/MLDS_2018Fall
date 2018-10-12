@@ -32,9 +32,9 @@ def shuffle_and_zip(x, y, ts, bs):
 # Parameters
 train_size = 10000
 test_size  = 10000
-epochs = 2000
+epochs = 500
 batch_size_list = range(50,2001,50)
-display_step = 50
+display_step = 10
 keep_prob = 0.5
 e = 1e-4
 
@@ -123,6 +123,8 @@ init = tf.global_variables_initializer()
 sharpness_hist = []
 train_loss_hist = []
 test_loss_hist = []
+train_acc_hist = []
+test_acc_hist = []
 for batch_size in batch_size_list:
 	train_data = shuffle_and_zip(x_train, y_train, train_size, batch_size)
 	test_data = shuffle_and_zip(x_test, y_test, test_size, batch_size)
@@ -135,14 +137,16 @@ for batch_size in batch_size_list:
 
 		for epoch in range(epochs):
 			np.random.shuffle(train_data)
-			avg_train_loss, avg_test_loss = 0, 0
+			avg_train_loss, avg_test_loss, avg_train_acc, avg_test_acc = 0, 0, 0, 0
 			for i, ((batch_x_train, batch_y_train), (batch_x_test, batch_y_test)) in enumerate(dataset):
 				# Run optimization op (backprop)
-				_, train_loss = sess.run([train_op, loss_op], feed_dict={ X: batch_x_train, Y: batch_y_train })
-				test_loss = sess.run(loss_op, feed_dict={ X: batch_x_test, Y: batch_y_test })
+				_, train_loss, train_acc = sess.run([train_op, loss_op, accuracy], feed_dict={ X: batch_x_train, Y: batch_y_train })
+				test_loss, test_acc = sess.run([loss_op, accuracy], feed_dict={ X: batch_x_test, Y: batch_y_test })
 				
 				avg_train_loss += train_loss/total_step
 				avg_test_loss += test_loss/total_step
+				avg_train_acc += train_acc/total_step
+				avg_test_acc += test_acc/total_step
 
 				if (i+1==total_step) and (epoch+1==epochs):
 					avg_sharpness = sess.run(sharpness, feed_dict={ X: batch_x_train, Y: batch_y_train })
@@ -150,6 +154,13 @@ for batch_size in batch_size_list:
 					sharpness_hist.append(avg_sharpness)
 					train_loss_hist.append(avg_train_loss)
 					test_loss_hist.append(avg_test_loss)
+					train_acc_hist.append(avg_train_acc)
+					test_acc_hist.append(avg_test_acc)
+				
+				# print progress
+				if (i+1) % display_step == 0:
+					print("Epoch [{:>3}/{:>3}] | Step [{:>3}/{:>3}] | Train Loss: {:.6f} \t| Acc: {:.6f}"
+						  .format(epoch+1, epochs, i+1, train_size//batch_size, train_loss, train_acc) )
 
 # plot
 plt.switch_backend('agg')
@@ -160,7 +171,7 @@ ax1.set_xscale('log')
 ax1.set_xlabel('batch size (log scale)')
 ax1.set_ylabel('loss', color=color)
 ax1.plot(batch_size_list, train_loss_hist, color=color, label='train')
-ax1.plot(batch_size_list, test_loss_hist, color=color, linestyle='--', label='test')
+ax1.plot(batch_size_list, test_loss_hist, color=color, label='test', linestyle='--')
 ax1.tick_params(axis='y', labelcolor=color)
 
 ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
@@ -171,7 +182,31 @@ ax2.plot(batch_size_list, sharpness_hist, color=color, label='sharpness')
 ax2.tick_params(axis='y', labelcolor=color)
 
 fig.tight_layout()  # otherwise the right y-label is slightly clipped
-plt.legend()
-plt.savefig('./bonus.png')
+ax1.legend(loc=2)
+ax2.legend(loc=1)
+plt.savefig('./bonus_loss.png')
 plt.show()
 
+# second plot
+fig, ax1 = plt.subplots()
+
+color = 'tab:blue'
+ax1.set_xscale('log')
+ax1.set_xlabel('batch size (log scale)')
+ax1.set_ylabel('loss', color=color)
+ax1.plot(batch_size_list, train_acc_hist, color=color, label='train')
+ax1.plot(batch_size_list, test_acc_hist, color=color, label='test', linestyle='--')
+ax1.tick_params(axis='y', labelcolor=color)
+
+ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
+
+color = 'tab:red'
+ax2.set_ylabel('sharpness', color=color)  # already handled the x-label with ax1
+ax2.plot(batch_size_list, sharpness_hist, color=color, label='sharpness')
+ax2.tick_params(axis='y', labelcolor=color)
+
+fig.tight_layout()  # otherwise the right y-label is slightly clipped
+ax1.legend(loc=2)
+ax2.legend(loc=1)
+plt.savefig('./bonus_acc.png')
+plt.show()
