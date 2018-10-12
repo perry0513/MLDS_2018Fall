@@ -103,7 +103,7 @@
 ## HW1-3
 ### Can network fit random labels?
 ![](readme_src/hw1-3/shuffled_label.png)
-####The more the parameters, the higher the accuracy.
+#### The more the parameters, the higher the accuracy.
 ![](readme_src/hw1-3/params.png)
 #### Comment on result
 Number of parameters v.s. Generalization
@@ -112,7 +112,7 @@ Number of parameters v.s. Generalization
 ![](readme_src/hw1-3/inter_model.png)
 #### Part 2
 ![](readme_src/hw1-3/sensitivity.png)
-####Comment on result:
+#### Comment on result:
 1. Smaller batch size leads to slightly better result than larger batch size (lower loss)
 2. Smaller batch size leads to flatter minima, which indicates lower sharpness
 3. Model trained with small batch size is less sensitive to change of input
