@@ -5,7 +5,7 @@ import tensorflow.keras.utils as np_utils
 import tensorflow.keras.datasets.mnist as mnist
 from matplotlib import pyplot as plt
 
-def load_data(train_size, batch_size, batched):
+def load_data(train_size):
 	(x_train, y_train), (x_test, y_test) = mnist.load_data()
 	x_train = x_train[0:train_size]
 	y_train = y_train[0:train_size]
@@ -19,14 +19,16 @@ def load_data(train_size, batch_size, batched):
 	y_train = np_utils.to_categorical(y_train, 10)
 	y_test = np_utils.to_categorical(y_test, 10)
 
-	if batched == False:
-		return (x_train, y_train), (x_test, y_test)
+	return (x_train, y_train), (x_test, y_test)
 
-	# batched (train_size % batch_size == 0)
-	train_data = list(zip( np.split(x_train, train_size/batch_size), np.split(y_train, train_size/batch_size) ))
-	test_data  = list(zip( np.split(x_test , train_size/batch_size), np.split(y_test , train_size/batch_size) ))
+# Shuffle data & zip for each epoch
+def shuffle_and_zip(x, y, ts, bs):
+	zipped = list(zip(x,y))
+	np.random.shuffle(zipped)
+	x, y = [ np.array(t) for t in zip(*zipped) ]
+	mod_ts = ts//bs * bs
+	return list(zip( np.split(x[:mod_ts], mod_ts//bs), np.split(y[:mod_ts], mod_ts//bs) ))
 
-	return train_data, test_data
 
 # Parameters
 train_size = 10000
@@ -96,11 +98,10 @@ train_losses, test_losses = [],[]
 train_accs, test_accs = [],[]
 sensitivity = []
 
+# Load data
+(x_train, y_train), (x_test, y_test) = load_data(train_size)
 
 for bs in batch_size:
-
-	# Load training data
-	train_data, test_data = load_data(train_size, bs, True)
 
 	with tf.Session() as sess:
 		sess.run(init)
@@ -108,7 +109,7 @@ for bs in batch_size:
 		# Start training
 		for epoch in range(epochs):
 			# Shuffle batch
-			np.random.shuffle(train_data)
+			train_data = shuffle_and_zip(x_train, y_train, train_size, bs)
 			for step, (batch_x_train, batch_y_train) in enumerate(train_data):
 				# Run optimization op (backprop)
 				_, loss, acc = sess.run([train_op, loss_op, accuracy], feed_dict={ X: batch_x_train, Y: batch_y_train })
@@ -120,7 +121,6 @@ for bs in batch_size:
 
 
 		# Calculate training/testing loss/acc
-		(x_train, y_train), (x_test, y_test) = load_data(train_size, bs, False)
 		train_loss, train_acc = sess.run([loss_op, accuracy], feed_dict={ X: x_train, Y: y_train })
 		test_loss, test_acc = sess.run([loss_op, accuracy], feed_dict={ X: x_test, Y: y_test })
 

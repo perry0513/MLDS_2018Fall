@@ -21,7 +21,7 @@ def load_data(train_size):
 
 	return (x_train, y_train), (x_test, y_test)
 
-
+# Shuffle data & zip for each epoch
 def shuffle_and_zip(x, y, ts, bs):
 	zipped = list(zip(x,y))
 	np.random.shuffle(zipped)
@@ -31,10 +31,10 @@ def shuffle_and_zip(x, y, ts, bs):
 
 # Parameters
 train_size = 10000
-epochs = 10
+epochs = 200
 batch_size = [ 100, 1000 ]	# train_size % batch_size == 0
 display_step = 10
-alpha_list = np.arange(-1,2,1.5)
+alpha_list = np.arange(-1,2,0.05)
 
 # Network Parameters
 n_hidden_1 = 256 # 1st layer number of neurons
