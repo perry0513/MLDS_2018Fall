@@ -18,6 +18,11 @@
     * [What happens when gradient is almost zero](#what-happens-when-gradient-is-almost-zero)
         * [Conclusion](#zero-conclusion)
     * [Visualize the error surface](#visualize-the-error-surface)
+* [HW1-3](#HW1-3)
+	* [Can network fit random labels?](#can-network-fit-random-labels)
+	* [Number of parameters v.s. Generalization](#number-of-parameters-vs-generalization)
+	* [Flatness v.s. Generalization](#flatness-vs-generalization)
+	* [Flatness v.s. Generalization: Bonus](#flatness-vs-generalization-bonus)
 
 ## Getting Started
 ### Prerequisites
@@ -41,6 +46,18 @@
     $ python min_ratio.py
 #### [Visualize the error surface](#visualize-the-error-surface)
 	$ python err_surface.py
+#### [Can network fit random labels?](#can-network-fit-random-labels)
+	$ python shuffled_label_keras.py
+#### [Number of parameters v.s. Generalization](#number-of-parameters-vs-generalization)
+	$ python number_of_params.py
+#### [Flatness v.s. Generalization](#flatness-vs-generalization)
+#### Part 1
+	$ python inter_model.py
+#### Part 2
+	$ python sensitivity.py
+#### [Flatness v.s. Generalization: Bonus](#flatness-vs-generalization-bonus)
+	$ python bonus.py
+
 
 ## HW1-1    
 ### Function Simulation
@@ -98,3 +115,24 @@
     When we  start training on gradient norm, there will be a jump on both loss and norm.
     When train with complicate function, result can get worse when minimizing gradient norm.
 ### Visualize the error surface
+
+## HW1-3
+### Can network fit random labels?
+![](readme_src/hw1-3/shuffled_label.png)
+#### The more the parameters, the higher the accuracy.
+![](readme_src/hw1-3/params.png)
+## Flatness v.s. Generalization
+#### Part 1
+![](readme_src/hw1-3/inter_model.png)
+#### Part 2
+![](readme_src/hw1-3/sensitivity.png)
+#### Comment on result:
+1. Smaller batch size leads to slightly better result than larger batch size (lower loss)
+2. Smaller batch size leads to flatter minima, which indicates lower sharpness
+3. Model trained with small batch size is less sensitive to change of input
+### Flatness v.s. Generalization: Bonus
+![](readme_src/hw1-3/sharpness.png)
+#### Comment on result
+1. It seems like our result is slightly different from what we expected.
+2. We calculate the sharpness with the norm of  tf.hessians, and the hessian is calculated with the average loss in a batch. Perhaps the small batch size leads to less accurate result.
+
