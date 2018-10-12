@@ -193,7 +193,7 @@ fig, ax1 = plt.subplots()
 color = 'tab:blue'
 ax1.set_xscale('log')
 ax1.set_xlabel('batch size (log scale)')
-ax1.set_ylabel('loss', color=color)
+ax1.set_ylabel('accuracy', color=color)
 ax1.plot(batch_size_list, train_acc_hist, color=color, label='train')
 ax1.plot(batch_size_list, test_acc_hist, color=color, label='test', linestyle='--')
 ax1.tick_params(axis='y', labelcolor=color)
