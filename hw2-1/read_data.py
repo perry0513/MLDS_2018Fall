@@ -1,6 +1,7 @@
 import json
 import numpy as np
 import tensorflow as tf
+import tensorflow.nn.rnn_cell as rnn_cell
 
 # Load data
 train_id    = './MLDS_hw2_1_data/training_data/id.txt'
@@ -34,11 +35,11 @@ def build_dict(y_train, y_test):
 	dictionary = set()
 	for vid in y_train:
 		for sent in vid:
-			add = [ w.lower().strip('.,') for w in sent.split(' ') ]
+			add = [ w.lower().strip('".,') for w in sent.split(' ') ]
 			dictionary.update(add)
 	for vid in y_test:
 		for sent in vid:
-			add = [ w.lower().strip('.,') for w in sent.split(' ') ]
+			add = [ w.lower().strip('".,') for w in sent.split(' ') ]
 			dictionary.update(add)
 
 	print(dictionary)
@@ -49,7 +50,17 @@ build_dict(y_train, y_test)
 encoder_units = 128
 decoder_units = 128
 
-'''
-def model(x):
-	layer = { 'weights': tf.Variable(tf.random_normal([layer_units, ]))}
-'''
+def encoder():
+	cell = rnn_cell.LSTMCell(n_hidden_units, forget_bias=1.0, state_is_tuple=True)
+	init_state = cell.zero_state(batch_size, dtype=tf.float32)
+	outputs, final_state = tf.nn.dynamic_rnn(cell, X_in, initial_state=init_state, time_major=False)
+
+
+
+
+
+
+
+
+
+
