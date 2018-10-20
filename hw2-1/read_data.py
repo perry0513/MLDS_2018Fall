@@ -32,20 +32,31 @@ def load_data():
 
 # build dictionary based on y_train & y_test
 def build_dict(y_train, y_test):
-	dictionary = set()
+	words = set()
 	for vid in y_train:
 		for sent in vid:
 			add = [ w.lower().strip('".,') for w in sent.split(' ') ]
-			dictionary.update(add)
+			words.update(add)
 	for vid in y_test:
 		for sent in vid:
 			add = [ w.lower().strip('".,') for w in sent.split(' ') ]
-			dictionary.update(add)
+			words.update(add)
 
+	dict_in_one_hot = []
+	for i in range(len(words)):
+		one_hot = [0] * len(words)
+		one_hot[i] = 1
+		dict_in_one_hot.append(one_hot)
+
+	dictionary = dict(zip(list(words), dict_in_one_hot))
+	reverse_dict = dict(dictionary.values(), dictionary.key)
 	print(dictionary)
 	print(len(dictionary))
+	return dictionary
 
 build_dict(y_train, y_test)
+
+
 
 encoder_units = 128
 decoder_units = 128
@@ -55,6 +66,12 @@ def encoder():
 	init_state = cell.zero_state(batch_size, dtype=tf.float32)
 	outputs, final_state = tf.nn.dynamic_rnn(cell, X_in, initial_state=init_state, time_major=False)
 
+	return final_state[1]
+
+def decoder():
+	cell = rnn_cell.LSTMCell(n_hidden_units, use_peepholes=True, forget_bias=1.0, state_is_tuple=True)
+	init_state = cell.zero_state(batch_size, dtype=tf.float32)
+	outputs, final_state = tf.nn.dynamic_rnn(cell, final_state, time_major=False)
 
 
 
