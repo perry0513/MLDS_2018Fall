@@ -29,3 +29,27 @@ def load_data():
 
 (x_train, x_test), (y_train, y_test) = load_data()
 
+# build dictionary based on y_train & y_test
+def build_dict(y_train, y_test):
+	dictionary = set()
+	for vid in y_train:
+		for sent in vid:
+			add = [ w.lower().strip('.,') for w in sent.split(' ') ]
+			dictionary.update(add)
+	for vid in y_test:
+		for sent in vid:
+			add = [ w.lower().strip('.,') for w in sent.split(' ') ]
+			dictionary.update(add)
+
+	print(dictionary)
+	print(len(dictionary))
+
+build_dict(y_train, y_test)
+
+encoder_units = 128
+decoder_units = 128
+
+'''
+def model(x):
+	layer = { 'weights': tf.Variable(tf.random_normal([layer_units, ]))}
+'''
