@@ -7,7 +7,7 @@ import_size = 1450
 
 # Shuffles sentence(1490,?), video(1450,80,4096)
 # Then separates video into (N, BS, 80, 4096)
-# NO!!!!! Transposes video data into (N, 80, BS, 4096)
+# (X) Transposes video data into (N, 80, BS, 4096)
 
 def shuffle_and_zip(sentences, video, BS):
 	print("Shuffling data . . .")
