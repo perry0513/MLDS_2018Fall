@@ -45,7 +45,7 @@ def load_and_store_data():
         data_encoded_by_idx.append(videos_encoded_by_idx)
     
     #### End of Store Data ####
-    
+    del word2idx_dictionary
     return idx2word_dictionary, data_encoded_by_idx
 
 if __name__ == "__main__":
