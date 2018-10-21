@@ -79,5 +79,3 @@ def get_sentence():
 
     #### End of Store Data ####
     return idx2word_dictionary, data_encoded_by_idx
-
-print load_and_store_data()[1]

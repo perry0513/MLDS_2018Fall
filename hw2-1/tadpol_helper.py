@@ -1,6 +1,5 @@
 import numpy as np
 import json
-from gensim.corpora import Dictionary
 import store_data as sd
 
 import_size = 1450
