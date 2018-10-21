@@ -17,12 +17,10 @@ input_embedding_size = 20
 encoder_hidden_units = 20
 decoder_hidden_units = encoder_hidden_units
 
-
 #Model input & output
 
-encoder_inputs = tf.placeholder(shape=(None,None), dtype=tf.int32, name='encoder_inputs')
+encoder_inputs = tf.placeholder(shape=(None,None,None), dtype=tf.float32, name='encoder_inputs')
 decoder_targets = tf.placeholder(shape=(None,None), dtype=tf.int32, name='decoder_targets') 
-decoder_inputs = tf.placeholder(shape=(None,None), dtype=tf.int32, name = 'decoder_inputs')
 
 #Embeddings
 
