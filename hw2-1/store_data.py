@@ -1,6 +1,24 @@
 import json
+import numpy as np
 
-def load_and_store_data():
+'''
+=========== get_video ============
+returns SHAPE(1450, 80, 4096)
+'''
+def get_video():
+    print("Loading training features . . .")
+
+    train_path = './MLDS_hw2_1_data/training_data/'
+    train_filename = open(train_path+'id.txt', 'r').read().splitlines()
+    train_filename = [ train_path+'feat/'+file+'.npy' for file in train_filename ]
+    #print(train_filename)
+
+    arr = np.array([np.load(file) for file in train_filename])
+
+    return arr
+
+
+def get_sentence():
     #### Load Data ####
     print("Loading training lables . . .")
     train_label_dict = json.loads(open('./MLDS_hw2_1_data/training_label.json', 'r').read())
@@ -47,6 +65,3 @@ def load_and_store_data():
     #### End of Store Data ####
     
     return idx2word_dictionary, data_encoded_by_idx
-
-if __name__ == "__main__":
-    print load_and_store_data()[1][0]
