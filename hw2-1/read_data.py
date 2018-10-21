@@ -47,18 +47,23 @@ def build_dict(y_train, y_test):
 
 build_dict(y_train, y_test)
 
+n_hidden_units = 80
 encoder_units = 128
 decoder_units = 128
 
-def encoder():
+def encoder(X_in):
 	cell = rnn_cell.LSTMCell(n_hidden_units, forget_bias=1.0, state_is_tuple=True)
 	init_state = cell.zero_state(batch_size, dtype=tf.float32)
 	outputs, final_state = tf.nn.dynamic_rnn(cell, X_in, initial_state=init_state, time_major=False)
+	print (final_state.shape)
+	return final_state[1]
 
-
-
-
-
+def decoder(X_in):
+	cell = rnn_cell.LSTMCell(n_hidden_units, forget_bias=1.0, state_is_tuple=True, use_peepholes=True)
+	init_state = cell.zero_state(batch_size, dtype=tf.float32)
+	outputs, final_state = tf.nn.dynamic_rnn(cell, X_in, initial_state=init_state, time_major=False)
+	print (final_state.shape)
+	return final_state[1]
 
 
 
