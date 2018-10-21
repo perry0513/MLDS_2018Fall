@@ -30,7 +30,7 @@ def get_sentence():
     # read the data and create two dictionary 
     # word2idx_dictionary format: {'word': word_idx}
     # idx2word_dictionary format: {word_idx: 'word'}
-    # clean the word2idx_dictionary in the end
+    # clean the word2idx_dictionary after storing data
 
     # init
     word2idx_dictionary = {
@@ -45,7 +45,7 @@ def get_sentence():
     }
     data_encoded_by_idx = []
     idx = 3
-    # walk through every video
+    # walk through data
     for videos in data:
         videos_encoded_by_idx = []
         for captions in videos:
@@ -62,6 +62,6 @@ def get_sentence():
             videos_encoded_by_idx.append(captions_encoded_by_idx)
         data_encoded_by_idx.append(videos_encoded_by_idx)
     
+    del word2idx_dictionary
     #### End of Store Data ####
-    
     return idx2word_dictionary, data_encoded_by_idx
