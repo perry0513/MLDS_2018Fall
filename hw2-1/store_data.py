@@ -44,21 +44,23 @@ def get_sentence():
         2: '<EOS>'
     }
     data_encoded_by_idx = []
-    idx = 3
+    current_idx = 3
     max_caption_length = 0
-    # walk through data
+
+    # create the dictionaries and encode data by word2idx
     for videos in data:
         videos_encoded_by_idx = []
         for captions in videos:
             captions_encoded_by_idx = []
             for word in captions.split():
+                # clear the ",. in the words
                 word = word.lower().strip('",.')
 
                 # add the word to dictionaries if not existed
                 if (not word2idx_dictionary.get(word)):
-                    word2idx_dictionary.update({word: idx})
-                    idx2word_dictionary.update({idx: word})
-                    idx += 1
+                    word2idx_dictionary.update({word: current_idx})
+                    idx2word_dictionary.update({current_idx: word})
+                    current_idx += 1
                 
                 captions_encoded_by_idx.append(word2idx_dictionary.get(word))
             
@@ -74,6 +76,7 @@ def get_sentence():
             captions += [0] * (max_caption_length-len(captions))
 
     del word2idx_dictionary
+
     #### End of Store Data ####
     return idx2word_dictionary, data_encoded_by_idx
 
