@@ -28,7 +28,6 @@ def load_data():
 
 	return (x_train, x_test), (y_train, y_test)
 
-(x_train, x_test), (y_train, y_test) = load_data()
 
 # build dictionary based on y_train & y_test
 def build_dict(y_train, y_test):
@@ -54,22 +53,15 @@ def build_dict(y_train, y_test):
 	print(len(dictionary))
 	return dictionary
 
-build_dict(y_train, y_test)
-
-<<<<<<< HEAD
+# build_dict(y_train, y_test)
 
 
-=======
-#### Parameters ####
-n_hidden_units = 80
->>>>>>> 9a42d0351a949773da6beba85364bdc7cfd64e05
-encoder_units = 128
-decoder_units = 128
+
 
 def encoder(n_hidden_units, x_in):
 	cell = rnn_cell.LSTMCell(n_hidden_units, forget_bias=1.0, state_is_tuple=True)
 	encoder_init_state = cell.zero_state(batch_size, dtype=tf.float32)
-	_, encoder_final_state = tf.nn.dynamic_rnn(cell, X_in, initial_state=encoder_init_state, time_major=False)
+	_, encoder_final_state = tf.nn.dynamic_rnn(cell, x_in, initial_state=encoder_init_state, time_major=False)
 	return encoder_final_state
 
 def decoder(n_hidden_units, encoder_final_state):
@@ -78,16 +70,25 @@ def decoder(n_hidden_units, encoder_final_state):
 	return (outputs, decoder_final_state)
 
 if __name__ == "__main__":
+	#### Parameters ####
+	n_hidden_units = 80
+	encoder_units = 128
+	decoder_units = 128
+
+	(x_train, x_test), (y_train, y_test) = load_data()
+
+	encoder_input = tf.placeholder(tf.float32, tf.random_normal([None, None, None]))
+	# decoder_input = 
+
 	encoder_final_state = encoder(n_hidden_unit, x_in)
 	(outputs, decoder_final_state) = decoder(n_hidden_units, encoder_final_state)
 
 
-	return final_state[1]
+	with tf.Session() as sess:
 
-def decoder():
-	cell = rnn_cell.LSTMCell(n_hidden_units, use_peepholes=True, forget_bias=1.0, state_is_tuple=True)
-	init_state = cell.zero_state(batch_size, dtype=tf.float32)
-	outputs, final_state = tf.nn.dynamic_rnn(cell, final_state, time_major=False)
+
+
+
 
 
 
