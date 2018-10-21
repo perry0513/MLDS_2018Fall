@@ -16,17 +16,18 @@ def load_and_store_data():
 
     # init
     word2idx_dictionary = {
-        "PAD": 0,
-        "BOS": 1,
-        "EOS": 2
+        '<PAD>': 0,
+        '<BOS>': 1,
+        '<EOS>': 2
     }
     idx2word_dictionary = {
-        0: "PAD",
-        1: "BOS",
-        2: "EOS"
+        0: '<PAD>',
+        1: '<BOS>',
+        2: '<EOS>'
     }
     data_encoded_by_idx = []
     idx = 3
+    max_caption_length = 0
     # walk through data
     for videos in data:
         videos_encoded_by_idx = []
@@ -34,6 +35,7 @@ def load_and_store_data():
             captions_encoded_by_idx = []
             for word in captions.split():
                 word = word.lower().strip('",.')
+
                 # add the word to dictionaries if not existed
                 if (not word2idx_dictionary.get(word)):
                     word2idx_dictionary.update({word: idx})
@@ -41,9 +43,20 @@ def load_and_store_data():
                     idx += 1
                 
                 captions_encoded_by_idx.append(word2idx_dictionary.get(word))
+            
+            if (max_caption_length < len(captions_encoded_by_idx)):
+                max_caption_length = len(captions_encoded_by_idx)
+            
             videos_encoded_by_idx.append(captions_encoded_by_idx)
         data_encoded_by_idx.append(videos_encoded_by_idx)
-    
+
+    # fill the list with <PAD> behind
+    for videos in data_encoded_by_idx:
+        for captions in videos:
+            captions += [0] * (max_caption_length-len(captions))
+
     del word2idx_dictionary
     #### End of Store Data ####
     return idx2word_dictionary, data_encoded_by_idx
+
+print load_and_store_data()[1]
