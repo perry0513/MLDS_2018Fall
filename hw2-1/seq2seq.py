@@ -85,35 +85,8 @@ optimizer = tf.train.AdamOptimizer()
 
 
 
-#Prepare data
 # Load data
-'''
-train_id    = './MLDS_hw2_1_data/training_data/id.txt'
-train_path  = './MLDS_hw2_1_data/training_data/feat/'
-train_label = './MLDS_hw2_1_data/training_label.json'
-test_id     = './MLDS_hw2_1_data/testing_data/id.txt'
-test_path   = './MLDS_hw2_1_data/testing_data/feat/'
-test_label  = './MLDS_hw2_1_data/testing_label.json'
 
-def load_data():
-	train_filename = open(train_id, 'r').read().splitlines()
-	train_filename = [ train_path+file+'.npy' for file in train_filename ]
-	x_train = np.array([ np.load(file) for file in train_filename ])
-
-	train_label_dict = json.loads(open(train_label, 'r').read())
-	y_train = [ label['caption'] for label in train_label_dict ]
-
-	test_filename = open(test_id, 'r').read().splitlines()
-	test_filename = [ test_path+file+'.npy' for file in test_filename ]
-	x_test = np.array([ np.load(file) for file in test_filename ])
-
-	test_label_dict = json.loads(open(test_label, 'r').read())
-	y_test = [ label['caption'] for label in test_label_dict ]
-
-	return (x_train, x_test), (y_train, y_test)
-
-(x_train, x_test), (y_train, y_test) = load_data()
-'''
 
 def get_train_X():
 	print("Loading training features . . .")
@@ -128,20 +101,12 @@ def get_train_X():
 
 #	arr = 18*arr
 
-#	arr.reshape((arr.shape[0], -1), order='F')
-
-#	print(arr.shape)
-
-#	print(arr)
-
 	return arr
 
 def get_train_Y():
 	print("Loading training lables . . .")
 	train_label_dict = json.loads(open('./MLDS_hw2_1_data/training_label.json', 'r').read())
 	data = [ label['caption'] for label in train_label_dict ]
-#	print(data)
-#	print(":) ",data[0][0])
 
 	caption = []
 	for i in range(np.shape(data)[0]):#every video 1450
@@ -150,54 +115,37 @@ def get_train_Y():
 			temp = strr.split()
 			per_video.append(temp)
 		caption.append(per_video)
-#	print(caption[0])
+
 	dct = Dictionary(caption[0])
 	for i in range(1,1450):
 		dct.add_documents(caption[i])
-#	print(dct)
+
 	caption_num = []
 	for i in range(1,1450): #every video 1450
 		per_video = []
 		r = np.shape(caption[i])[0]
-		for j in range(80):#np.shape(caption[i])[0]):
+		for j in range(80):
 
 			temp = dct.doc2idx(caption[i][j%r])
 
 			per_video.append(temp)
 		caption_num.append(per_video)
-#	print(caption_num[0])
 	return caption_num, dct
 
 
 #Train
 
-batch_size = 7
-
-batches = get_train_X()
+train_X = get_train_X()
 train_Y, dct = get_train_Y()
-
-print("dct", dct)
-
-'''helpers.random_sequences(
-	length_from = 3, length_to = 8,
-	vocab_lower = 2, vocab_upper = 10,
-	batch_size = batch_size
-	)'''
-
-print("Train data ready!")
-
-
-print("=================\n", batches)
 
 
 def next_feed(_idx):
-	b = batches[_idx]
-	t = train_Y[_idx]
+	x = train_X[_idx]
+	y = train_Y[_idx]
 
 
-	encoder_inputs_, _ = helpers.batch(b)
-	decoder_targets_, _ = helpers.batch(train_Y[_idx])
-	decoder_inputs_, _ = helpers.batch(train_Y[_idx])
+	encoder_inputs_, _ = helpers.batch(x)
+	decoder_targets_, _ = helpers.batch(y)
 	
 	_idx = _idx + 1
 
@@ -205,11 +153,8 @@ def next_feed(_idx):
 
 	fdict = {
 		encoder_inputs: encoder_inputs_,
-		decoder_inputs: decoder_inputs_,
 		decoder_targets: decoder_targets_
 	}
-
-#	print("dict:\n", dict)
 
 	return fdict
 
@@ -220,13 +165,12 @@ loss_track = []
 
 max_batches = 1000
 batches_in_epochs = 1
-
 _idx = 0
+
 try:
 	for batch in range(max_batches):
 		fd = next_feed(_idx)
-#		print("\n[train_op, loss]\n", train_op, "\n\nloss\n", loss)
-#		print("\n\nfd\n", fd)
+
 		_, l = sess.run([train_op, loss],feed_dict = fd)
 
 		loss_track.append(l)
@@ -239,8 +183,6 @@ try:
 				print('  sample {}:'.format(i + 1))
 				print('	input	 > {}'.format(inp))
 				print('	predicted > {}'.format(pred))
-			#	tmp = (Dictionary(dct))(pred[0])
-			#	print('\n            ', tmp )
 				if i >= 2:
 					break
 			print()
