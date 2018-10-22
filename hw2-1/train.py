@@ -3,6 +3,7 @@ import tensorflow as tf
 import store_data
 import tadpol_helper
 from seq2seq import Seq2seq
+import time
 
 
 encoder_input_video = store_data.get_video()
@@ -25,7 +26,7 @@ embedding_size = rnn_size
 
 with tf.Session() as sess:
 	model = Seq2seq(rnn_size=rnn_size, num_layers=num_layers, feat_size=feat_size, batch_size=batch_size, vocab_size=vocab_size, 
-					max_encoder_steps=max_encoder_steps, max_decoder_steps=max_decoder_steps, embedding_size=embedding_size)
+					mode='train', max_encoder_steps=max_encoder_steps, max_decoder_steps=max_decoder_steps, embedding_size=embedding_size)
 
 	for epoch in epochs:
 		shuffled_video, shuffled_sentences = tadpol_helper.shuffle_and_zip(indexed_sentence, encoder_input_video, batch_size)
@@ -34,5 +35,9 @@ with tf.Session() as sess:
 		for step, (batch_video, batch_sentences) in enumerate(trainset):
 			np.transpose(batch_video, [1,0,2])
 			model.train(sess, batch_video, batch_sentences)
+
+
+
+	model.saver.save(sess, './model/' + time.strftime("%m%d%Y_%H%M", time.localtime()))
 
 

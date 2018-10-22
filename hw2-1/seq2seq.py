@@ -94,7 +94,7 @@ class Seq2seq():
 
 		# Calculate loss with sequence_loss
 		decoder_logits_train = tf.identity(decoder_outputs.rnn_output)
-		decoder_predict_train = tf.argmax(decoder_logits_train, axis=-1, name='decoder_pred_train')
+		self.decoder_predict_train = tf.argmax(decoder_logits_train, axis=-1, name='decoder_pred_train')
 
 
 		self.loss = tf.contrib.seq2seq.sequence_loss(
@@ -118,7 +118,7 @@ class Seq2seq():
         return cell
 
 
-    def train(self, sess, encoder_inputs, decoder_inputs,  , decoder_targets_length):
+    def train(self, sess, encoder_inputs, decoder_inputs, decoder_targets, decoder_targets_length):
     	feed_dict = { self.encoder_inputs = encoder_inputs,
     				  self.decoder_inputs = decoder_inputs,
     				  self.decoder_targets = decoder_targets,
@@ -127,7 +127,14 @@ class Seq2seq():
     	_, loss = sess.run([self.train_op, self.loss], feed_dict=feed_dict)
     	return loss
 
+    def test_predict(self, sess, encoder_inputs, decoder_inputs, decoder_targets, decoder_targets_length):
+    	feed_dict = { self.encoder_inputs = encoder_inputs,
+    				  self.decoder_inputs = decoder_inputs,
+    				  self.decoder_targets = decoder_targets,
+    				  self.decoder_targets_length = decoder_targets_length }
 
+    	predict = sess.run(decoder_logits_train, feed_dict)
+    	return predict
 
-
+ 
 

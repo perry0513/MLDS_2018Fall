@@ -50,11 +50,7 @@ def get_sentence():
     for videos in data:
         videos_encoded_by_idx = []
         for captions in videos:
-<<<<<<< HEAD
-            captions_encoded_by_idx = [1]
-=======
             captions_encoded_by_idx = [BOS]
->>>>>>> 3b80e8463bf1fcf3928fcbfd905444144a9475d1
             for word in captions.split():
                 # clear the ",. in the words
                 word = word.lower().strip('",.')
