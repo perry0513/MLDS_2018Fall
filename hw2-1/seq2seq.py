@@ -30,7 +30,7 @@ class Seq2seq():
 		self.encoder_inputs  = tf.placeholder(shape=(None, None, None), dtype=tf.float32, name='encoder_inputs')
 		# shape=(batch_size, num_of_sentence, decoder_hidden_units)
 		self.decoder_targets = tf.placeholder(shape=(None, None, None), dtype=tf.int32, name='decoder_targets') 
-		self.decoder_inputs  = tf.placeholder(shape=(None, None, None), dtype=tf.int32, name='decoder_inputs')
+		self.decoder_inputs  = tf.placeholder(shape=(None, None), dtype=tf.int32, name='decoder_inputs')
 		# embeddings
 
 		embeddings = tf.Variable(tf.random_uniform([self.vocab_size, self.embedding_size], -1.0, 1.0), dtype = tf.float32)
@@ -108,6 +108,9 @@ class Seq2seq():
 		capped_gradients = [ (tf.clip_by_value(grad, -1., 1.), var) for grad, var in gradients if grad is not None ]
 		self.train_op = optimizer.apply_gradients(capped_gradients)
 
+		tf.summary.scalar('loss', self.loss)
+		self.summary_op = tf.summary.merge_all()
+
 
     def _create_cell(self):
     	def single_cell():
@@ -118,14 +121,14 @@ class Seq2seq():
         return cell
 
 
-    def train(self, sess, encoder_inputs, decoder_inputs,  , decoder_targets_length):
-    	feed_dict = { self.encoder_inputs = encoder_inputs,
-    				  self.decoder_inputs = decoder_inputs,
-    				  self.decoder_targets = decoder_targets,
-    				  self.decoder_targets_length = decoder_targets_length }
+    def train(self, sess, encoder_inputs, decoder_inputs, decoder_targets, decoder_targets_length):
+    	feed_dict = { self.encoder_inputs : encoder_inputs,
+    				  self.decoder_inputs : decoder_inputs,
+    				  self.decoder_targets : decoder_targets,
+    				  self.decoder_targets_length : decoder_targets_length }
 
-    	_, loss = sess.run([self.train_op, self.loss], feed_dict=feed_dict)
-    	return loss
+    	_, loss, summary = sess.run([self.train_op, self.loss, self.summary_op], feed_dict=feed_dict)
+    	return loss, summary
 
 
 
