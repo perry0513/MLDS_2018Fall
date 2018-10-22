@@ -29,15 +29,18 @@ def get_sentence():
     # word2idx_dictionary format: {'word': word_idx}
     # idx2word_dictionary format: {word_idx: 'word'}
     # data_encoded_by_idx format: videos[captoions[words[]]]
+    PAD = 0
+    BOS = 1
+    EOS = 2
     word2idx_dictionary = {
-        '<PAD>': 0,
-        '<BOS>': 1,
-        '<EOS>': 2
+        '<PAD>': PAD,
+        '<BOS>': BOS,
+        '<EOS>': EOS
     }
     idx2word_dictionary = {
-        0: '<PAD>',
-        1: '<BOS>',
-        2: '<EOS>'
+        PAD: '<PAD>',
+        BOS: '<BOS>',
+        EOS: '<EOS>'
     }
     data_encoded_by_idx = []
     current_idx = 3
@@ -47,7 +50,7 @@ def get_sentence():
     for videos in data:
         videos_encoded_by_idx = []
         for captions in videos:
-            captions_encoded_by_idx = [1]
+            captions_encoded_by_idx = [BOS]
             for word in captions.split():
                 # clear the ",. in the words
                 word = word.lower().strip('",.')
@@ -69,7 +72,7 @@ def get_sentence():
     # fill the list with <PAD> behind
     for videos in data_encoded_by_idx:
         for captions in videos:
-            captions += [0] * (max_caption_length-len(captions))
+            captions += [PAD] * (max_caption_length-len(captions))
 
     del word2idx_dictionary
 
