@@ -24,15 +24,10 @@ def get_sentence():
     train_label_dict = json.loads(open('./MLDS_hw2_1_data/training_label.json', 'r').read())
     data = [ label['caption'] for label in train_label_dict ]
 
-    #### End of Load Data ####
-
     #### Store Data ####
-    # read the data and create two dictionary 
+    # init
     # word2idx_dictionary format: {'word': word_idx}
     # idx2word_dictionary format: {word_idx: 'word'}
-    # clean the word2idx_dictionary after storing data
-
-    # init
     word2idx_dictionary = {
         '<PAD>': 0,
         '<BOS>': 1,
@@ -77,5 +72,4 @@ def get_sentence():
 
     del word2idx_dictionary
 
-    #### End of Store Data ####
     return idx2word_dictionary, data_encoded_by_idx
