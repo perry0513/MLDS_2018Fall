@@ -14,7 +14,7 @@ class Seq2seq():
 		self.rnn_size = rnn_size
 		self.num_layers = num_layers
 		self.feat_size = feat_size
-		self.
+		self.batch_size = batch_size
 		self.word_to_idx = word_to_idx
 		self.mode = mode
 		self.max_encoder_steps = max_encoder_steps
@@ -35,27 +35,34 @@ class Seq2seq():
 		self.decoder_inputs  = tf.placeholder(shape=(None, None, None), dtype=tf.int32, name='decoder_inputs')
 		# embeddings
 
-		embeddings = tf.Variable(tf.random_uniform([vocab_size, self.embedding_size], -1.0, 1.0), dtype = tf.float32)
-		decoder_inputs_embedded = tf.nn.embedding_lookup(embeddings, decoder_inputs)
+		embeddings = tf.Variable(tf.random_uniform([self.vocab_size, self.embedding_size], -1.0, 1.0), dtype = tf.float32)
+		decoder_inputs_embedded = tf.nn.embedding_lookup(embeddings, self.decoder_inputs)
 		np.transpose(decoder_inputs_embedded, [1,0,2])
 
 		# Encoder
 
-		encoder_cell = tf.nn.rnn_cell.LSTMCell(self.rnn_size)
+		encoder_cell = self._create_cell()
 
-		encoder_outputs, encoder_final_state = tf.nn.dynamic_rnn(
-			encoder_cell,
-			encoder_inputs,
-			dtype = tf.float32,
-			time_major = True
-			)
+		encoder_outputs, encoder_final_state = tf.nn.dynamic_rnn(encoder_cell, encoder_inputs, dtype = tf.float32, time_major = True)
 
 		# Decoder
 
-		decoder_cell = tf.nn.rnn_cell.LSTMCell(self.rnn_size, use_peepholes=True)
+		# Decoder cell with attention
+		attention_mechanism = tf.contrib.seq2seq.BahdanauAttention(
+													num_units=self.rnn_size, 
+													memory=encoder_outputs, 
+													normalize=True)
 
+		decoder_cell = tf.contrib.seq2seq.AttentionWrapper(
+												cell=self._create_cell(), 
+												attention_mechanism=attention_mechanism, 
+												attention_layer_size=self.rnn_size, 
+												name='Attention_Wrapper')
+
+		decoder_initial_state = decoder_cell.zero_state(batch_size=self.batch_size, dtype=tf.float32).clone(cell_state=encoder_final_state)
 
 		output_layer = tf.layers.Dense(vocab_size, kernel_initializer=tf.truncated_normal_initializer(mean=0.0, stddev=0.1))
+
 
 		self.decoder_targets_length = tf.placeholder(tf.int32, [None], name='decoder_targets_length')
 		max_target_sequence_length = tf.reduce_max(decoder_targets_length, name='max_target_len')
@@ -64,10 +71,12 @@ class Seq2seq():
 
 
 		# Helper
+		# if mode == 
 		training_helper = tf.contrib.seq2seq.TrainingHelper(
 										inputs=decoder_inputs_embedded, 
-										sequence_length=decoder_targets_length, 
-										time_major=False, name='training_helper')
+										sequence_length=decoder_targets_length,
+										memory_sequence_length=?????????, 
+										time_major=True, name='training_helper')
 
 		# Decoder
 		training_decoder = tf.contrib.seq2seq.BasicDecoder(
@@ -92,7 +101,23 @@ class Seq2seq():
 							weights=mask)
 		optimizer = tf.train.AdamOptimizer()
 
-		train_op = optimizer.minimize(loss)
+		# Clip gradient if gradient is too large
+		gradients = optimizer.compute_gradients(loss)
+        capped_gradients = [(tf.clip_by_value(grad, -1., 1.), var) for grad, var in gradients if grad is not None]
+        train_op = optimizer.apply_gradients(capped_gradients)
+
+        return train_op
+
+
+    def _create_cell(self):
+    	def single_cell():
+            cell = tf.contrib.rnn.LSTMCell(self.rnn_size)
+            # cell = tf.contrib.rnn.DropoutWrapper(single_cell, output_keep_prob=self.keep_prob_placeholder, seed=9487)
+            return cell
+        cell = tf.contrib.rnn.MultiRNNCell([single_cell() for _ in range(self.num_layers)])
+        return cell
+
+
 
 	def train(self, sess, encoder_inputs):
 
