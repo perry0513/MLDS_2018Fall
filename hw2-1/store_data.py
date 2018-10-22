@@ -28,6 +28,7 @@ def get_sentence():
     # init
     # word2idx_dictionary format: {'word': word_idx}
     # idx2word_dictionary format: {word_idx: 'word'}
+    # data_encoded_by_idx format: videos[captoions[words[]]]
     word2idx_dictionary = {
         '<PAD>': 0,
         '<BOS>': 1,
@@ -46,20 +47,20 @@ def get_sentence():
     for videos in data:
         videos_encoded_by_idx = []
         for captions in videos:
-            captions_encoded_by_idx = []
+            captions_encoded_by_idx = [1]
             for word in captions.split():
                 # clear the ",. in the words
                 word = word.lower().strip('",.')
 
                 # add the word to dictionaries if not existed
-                if (not word2idx_dictionary.get(word)):
+                if not word2idx_dictionary.get(word):
                     word2idx_dictionary.update({word: current_idx})
                     idx2word_dictionary.update({current_idx: word})
                     current_idx += 1
                 
                 captions_encoded_by_idx.append(word2idx_dictionary.get(word))
             
-            if (max_caption_length < len(captions_encoded_by_idx)):
+            if max_caption_length < len(captions_encoded_by_idx):
                 max_caption_length = len(captions_encoded_by_idx)
             
             videos_encoded_by_idx.append(captions_encoded_by_idx)
