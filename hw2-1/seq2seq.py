@@ -87,7 +87,6 @@ optimizer = tf.train.AdamOptimizer()
 
 # Load data
 
-
 def get_train_X():
 	print("Loading training features . . .")
 
