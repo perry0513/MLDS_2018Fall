@@ -48,5 +48,3 @@ def load_and_store_data():
     del word2idx_dictionary
     return idx2word_dictionary, data_encoded_by_idx
 
-if __name__ == "__main__":
-    print load_and_store_data()[1][0]
