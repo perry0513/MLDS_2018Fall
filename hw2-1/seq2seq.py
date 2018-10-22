@@ -1,6 +1,6 @@
 import numpy as np
 import tensorflow as tf
-import helpers
+import store_data
 import json
 from pprint import pprint
 import skvideo.io 
@@ -9,19 +9,17 @@ tf.reset_default_graph()
 sess = tf.InteractiveSession()
 
 class Seq2seq():
-	def __init__(self, rnn_size, num_layers, feat_size, batch_size, word_to_idx, 
+	def __init__(self, rnn_size, num_layers, feat_size, batch_size, vocab_size, 
 				 mode, max_encoder_steps, max_decoder_steps, embedding_size):
 		self.rnn_size = rnn_size
 		self.num_layers = num_layers
 		self.feat_size = feat_size
 		self.batch_size = batch_size
-		self.word_to_idx = word_to_idx
+		self.vocab_size = vocab_size
 		self.mode = mode
 		self.max_encoder_steps = max_encoder_steps
 		self.max_decoder_steps = max_decoder_steps
 		self.embedding_size = embedding_size
-
-		self.vocab_size = len(self.word_to_idx)
 
         self.build_model()
 
@@ -70,13 +68,18 @@ class Seq2seq():
 
 
 
-		# Helper
-		# if mode == 
-		training_helper = tf.contrib.seq2seq.TrainingHelper(
-										inputs=decoder_inputs_embedded, 
-										sequence_length=decoder_targets_length,
-										memory_sequence_length=?????????, 
-										time_major=True, name='training_helper')
+		# Define helper based on 'train' or 'infer' mode
+		if self.mode == 'train':
+			training_helper = tf.contrib.seq2seq.TrainingHelper(
+											inputs=decoder_inputs_embedded, 
+											sequence_length=decoder_targets_length,
+											# memory_sequence_length=?????????, 
+											time_major=True, name='training_helper')
+		elif self.mode == 'infer':
+			training_helper = tf.contrib.seq2seq.GreedyEmbeddingHelper(
+											embedding=embeddings, 
+											start_tokens=tf.fill([self.batch_size], 1), # word_to_idx['<BOS>'] = 1
+											end_token=2) 								# word_to_idx['<EOS>'] = 2
 
 		# Decoder
 		training_decoder = tf.contrib.seq2seq.BasicDecoder(
@@ -89,13 +92,12 @@ class Seq2seq():
 										impute_finished=True, 
 										maximum_iterations=self.max_target_sequence_length)
 
-
+		# Calculate loss with sequence_loss
 		decoder_logits_train = tf.identity(decoder_outputs.rnn_output)
 		decoder_predict_train = tf.argmax(decoder_logits_train, axis=-1, name='decoder_pred_train')
 
-		# Optimizer
 
-		loss = tf.contrib.seq2seq.sequence_loss(
+		self.loss = tf.contrib.seq2seq.sequence_loss(
 							logits=decoder_logits_train, 
 							targets=decoder_targets, 
 							weights=mask)
@@ -103,10 +105,8 @@ class Seq2seq():
 
 		# Clip gradient if gradient is too large
 		gradients = optimizer.compute_gradients(loss)
-        capped_gradients = [(tf.clip_by_value(grad, -1., 1.), var) for grad, var in gradients if grad is not None]
-        train_op = optimizer.apply_gradients(capped_gradients)
-
-        return train_op
+		capped_gradients = [ (tf.clip_by_value(grad, -1., 1.), var) for grad, var in gradients if grad is not None ]
+		self.train_op = optimizer.apply_gradients(capped_gradients)
 
 
     def _create_cell(self):
@@ -114,12 +114,18 @@ class Seq2seq():
             cell = tf.contrib.rnn.LSTMCell(self.rnn_size)
             # cell = tf.contrib.rnn.DropoutWrapper(single_cell, output_keep_prob=self.keep_prob_placeholder, seed=9487)
             return cell
-        cell = tf.contrib.rnn.MultiRNNCell([single_cell() for _ in range(self.num_layers)])
+        cell = tf.contrib.rnn.MultiRNNCell([ single_cell() for _ in range(self.num_layers) ])
         return cell
 
 
+    def train(self, sess, encoder_inputs, decoder_inputs,  , decoder_targets_length):
+    	feed_dict = { self.encoder_inputs = encoder_inputs,
+    				  self.decoder_inputs = decoder_inputs,
+    				  self.decoder_targets = decoder_targets,
+    				  self.decoder_targets_length = decoder_targets_length }
 
-	def train(self, sess, encoder_inputs):
+    	_, loss = sess.run([self.train_op, self.loss], feed_dict=feed_dict)
+    	return loss
 
 
 
