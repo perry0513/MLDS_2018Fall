@@ -21,7 +21,7 @@ class Seq2seq():
 		self.max_decoder_steps = max_decoder_steps
 		self.embedding_size = embedding_size
 
-        self.build_model()
+		self.build_model()
 
 	def build_model(self):
 		# Model input & output
@@ -35,13 +35,13 @@ class Seq2seq():
 
 		embeddings = tf.Variable(tf.random_uniform([self.vocab_size, self.embedding_size], -1.0, 1.0), dtype = tf.float32)
 		decoder_inputs_embedded = tf.nn.embedding_lookup(embeddings, self.decoder_inputs)
-		np.transpose(decoder_inputs_embedded, [1,0,2])
+		tf.transpose(decoder_inputs_embedded, [1,0,2])
 
 		# Encoder
 
 		encoder_cell = self._create_cell()
 
-		encoder_outputs, encoder_final_state = tf.nn.dynamic_rnn(encoder_cell, encoder_inputs, dtype = tf.float32, time_major = True)
+		encoder_outputs, encoder_final_state = tf.nn.dynamic_rnn(encoder_cell, self.encoder_inputs, dtype = tf.float32, time_major = True)
 
 		# Decoder
 
@@ -112,32 +112,33 @@ class Seq2seq():
 		self.summary_op = tf.summary.merge_all()
 
 
-    def _create_cell(self):
-    	def single_cell():
-            cell = tf.contrib.rnn.LSTMCell(self.rnn_size)
-            # cell = tf.contrib.rnn.DropoutWrapper(single_cell, output_keep_prob=self.keep_prob_placeholder, seed=9487)
-            return cell
-        cell = tf.contrib.rnn.MultiRNNCell([ single_cell() for _ in range(self.num_layers) ])
-        return cell
+	def _create_cell(self):
+		def single_cell():
+			cell = tf.contrib.rnn.LSTMCell(self.rnn_size)
+			# cell = tf.contrib.rnn.DropoutWrapper(single_cell, output_keep_prob=self.keep_prob_placeholder, seed=9487)
+			return cell
+		cell = tf.contrib.rnn.MultiRNNCell([ single_cell() for _ in range(self.num_layers) ])
+		return cell
 
 
-    def train(self, sess, encoder_inputs, decoder_inputs, decoder_targets, decoder_targets_length):
-    	feed_dict = { self.encoder_inputs : encoder_inputs,
-    				  self.decoder_inputs : decoder_inputs,
-    				  self.decoder_targets : decoder_targets,
-    				  self.decoder_targets_length : decoder_targets_length }
+	def train(self, sess, encoder_inputs, decoder_inputs, decoder_targets, decoder_targets_length):
+		feed_dict = { self.encoder_inputs : encoder_inputs,
+					  self.decoder_inputs : decoder_inputs,
+					  self.decoder_targets : decoder_targets,
+					  self.decoder_targets_length : decoder_targets_length }
 
-    	_, loss, summary = sess.run([self.train_op, self.loss, self.summary_op], feed_dict=feed_dict)
-    	return loss, summary
+		_, loss, summary = sess.run([self.train_op, self.loss, self.summary_op], feed_dict=feed_dict)
+		return loss, summary
 
-    def test_predict(self, sess, encoder_inputs, decoder_inputs, decoder_targets, decoder_targets_length):
-    	feed_dict = { self.encoder_inputs = encoder_inputs,
-    				  self.decoder_inputs = decoder_inputs,
-    				  self.decoder_targets = decoder_targets,
-    				  self.decoder_targets_length = decoder_targets_length }
+'''
+	def test_predict(self, sess, encoder_inputs, decoder_inputs, decoder_targets, decoder_targets_length):
+		feed_dict = { self.encoder_inputs = encoder_inputs,
+					  self.decoder_inputs = decoder_inputs,
+					  self.decoder_targets = decoder_targets,
+					  self.decoder_targets_length = decoder_targets_length }
 
-    	predict = sess.run(decoder_logits_train, feed_dict)
-    	return predict
-
+		predict = sess.run(decoder_logits_train, feed_dict)
+		return predict
+'''
  
 
