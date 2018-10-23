@@ -1,7 +1,5 @@
 import numpy as np
 import tensorflow as tf
-import store_data
-import json
 # from pprint import pprint
 # import skvideo.io 
 
