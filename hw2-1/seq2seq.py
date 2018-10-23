@@ -24,16 +24,18 @@ class Seq2seq():
 	def build_model(self):
 		# Model input & output
 
-		# shape=(batch_size, encoder_hidden_units, input_size)
-		self.encoder_inputs  = tf.placeholder(shape=(None, None, None), dtype=tf.float32, name='encoder_inputs')
-		# shape=(batch_size, num_of_sentence, decoder_hidden_units)
-		self.decoder_targets = tf.placeholder(shape=(None, None, None), dtype=tf.int32, name='decoder_targets') 
+		# shape = (batch_size, encoder_hidden_units, input_size)
+		self.encoder_inputs  = tf.placeholder(shape=(None, None, 4096), dtype=tf.float32, name='encoder_inputs')
+		# shape = (num_of_sentence, decoder_hidden_units)
 		self.decoder_inputs  = tf.placeholder(shape=(None, None), dtype=tf.int32, name='decoder_inputs')
+		self.decoder_targets = tf.placeholder(shape=(None, None), dtype=tf.int32, name='decoder_targets') 
+		self.decoder_targets_length = tf.placeholder(tf.int32, [None], name='decoder_targets_length')
+
 		# embeddings
 
 		embeddings = tf.Variable(tf.random_uniform([self.vocab_size, self.embedding_size], -1.0, 1.0), dtype = tf.float32)
 		decoder_inputs_embedded = tf.nn.embedding_lookup(embeddings, self.decoder_inputs)
-		tf.transpose(decoder_inputs_embedded, [1,0,2])
+		decoder_inputs_embedded = tf.transpose(decoder_inputs_embedded, [1,0,2])
 
 		# Encoder
 
@@ -57,12 +59,11 @@ class Seq2seq():
 
 		decoder_initial_state = decoder_cell.zero_state(batch_size=self.batch_size, dtype=tf.float32).clone(cell_state=encoder_final_state)
 
-		output_layer = tf.layers.Dense(vocab_size, kernel_initializer=tf.truncated_normal_initializer(mean=0.0, stddev=0.1))
+		output_layer = tf.layers.Dense(self.vocab_size, kernel_initializer=tf.truncated_normal_initializer(mean=0.0, stddev=0.1))
 
 
-		self.decoder_targets_length = tf.placeholder(tf.int32, [None], name='decoder_targets_length')
-		max_target_sequence_length = tf.reduce_max(decoder_targets_length, name='max_target_len')
-		mask = tf.sequence_mask(decoder_targets_length, max_target_sequence_length, dtype=tf.float32, name='masks')
+		max_target_sequence_length = tf.reduce_max(self.decoder_targets_length, name='max_target_len')
+		mask = tf.sequence_mask(self.decoder_targets_length, max_target_sequence_length, dtype=tf.float32, name='masks')
 
 
 
@@ -70,14 +71,14 @@ class Seq2seq():
 		if self.mode == 'train':
 			training_helper = tf.contrib.seq2seq.TrainingHelper(
 											inputs=decoder_inputs_embedded, 
-											sequence_length=decoder_targets_length,
+											sequence_length=self.decoder_targets_length,
 											# memory_sequence_length=?????????, 
 											time_major=True, name='training_helper')
-		elif self.mode == 'infer':
+		else:
 			training_helper = tf.contrib.seq2seq.GreedyEmbeddingHelper(
 											embedding=embeddings, 
-											start_tokens=tf.fill([self.batch_size], 1), # word_to_idx['<BOS>'] = 1
-											end_token=2) 								# word_to_idx['<EOS>'] = 2
+											start_tokens=tf.fill([self.batch_size], 1), # <BOS> = 1
+											end_token=2) 								# <EOS> = 2
 
 		# Decoder
 		training_decoder = tf.contrib.seq2seq.BasicDecoder(
@@ -88,7 +89,7 @@ class Seq2seq():
 		decoder_outputs, _, _ = tf.contrib.seq2seq.dynamic_decode(
 										decoder=training_decoder, 
 										impute_finished=True, 
-										maximum_iterations=self.max_target_sequence_length)
+										maximum_iterations=max_target_sequence_length)
 
 		# Calculate loss with sequence_loss
 		decoder_logits_train = tf.identity(decoder_outputs.rnn_output)
@@ -97,12 +98,12 @@ class Seq2seq():
 
 		self.loss = tf.contrib.seq2seq.sequence_loss(
 							logits=decoder_logits_train, 
-							targets=decoder_targets, 
+							targets=self.decoder_targets, 
 							weights=mask)
 		optimizer = tf.train.AdamOptimizer()
 
 		# Clip gradient if gradient is too large
-		gradients = optimizer.compute_gradients(loss)
+		gradients = optimizer.compute_gradients(self.loss)
 		capped_gradients = [ (tf.clip_by_value(grad, -1., 1.), var) for grad, var in gradients if grad is not None ]
 		self.train_op = optimizer.apply_gradients(capped_gradients)
 

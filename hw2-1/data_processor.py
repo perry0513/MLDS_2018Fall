@@ -58,13 +58,14 @@ class DataProcessor():
         shuffled_videos = [ np.array(self.feat[idx]) for idx in shuffled_idx ]
         shuffled_targets_length = [ len(target) for target in shuffled_targets ]
 
-        # Batch shuffled_idx, shuffled_inputs, shuffled_targets
+        # Batch shuffled_idx, shuffled_inputs, shuffled_targets, shuffled_targets_length
         num_of_batch = total_data_num // batch_size
         batched_videos  = np.split(np.array(shuffled_videos[: num_of_batch*batch_size ]), num_of_batch)
         batched_inputs  = np.split(np.array(shuffled_inputs[: num_of_batch*batch_size ]), num_of_batch)
         batched_targets = np.split(np.array(shuffled_targets[: num_of_batch*batch_size ]), num_of_batch)
         batched_targets_length = np.split(np.array(shuffled_targets_length[: num_of_batch*batch_size ]), num_of_batch)
 
+        # shape = (number_of_batch, batch_size, ...)
         return batched_videos, batched_inputs, batched_targets, batched_targets_length
 
 
@@ -154,7 +155,7 @@ class DataProcessor():
     def set_decoder_targets(self):
         self.decoder_targets = []
         for videos in (self.training_data_encoded_by_idx if self.mode == 'train' else self.testing_data_encoded_by_idx):
-            self.decoder_targets.append( np.array([ np.array(captions + [self.EOS]) for captions in videos ] ) )
+            self.decoder_targets.append( np.array([ np.array(captions + [self.EOS] + [self.PAD]*(self.max_caption_length-len(captions))) for captions in videos ] ) )
 
 # # TEST
 # dataprocessor = DataProcessor('test')
@@ -162,8 +163,8 @@ class DataProcessor():
 # print(dataprocessor.get_dictionary())
 # print(dataprocessor.get_decoder_inputs().shape)
 # print(dataprocessor.get_decoder_targets().shape)
-# a, b, c, d = dataprocessor.get_shuffle_and_batch(7)
-# print(len(a))
+# a, b, c, d = dataprocessor.get_shuffle_and_batch(5)
+# print(np.array(a).shape)
 # print(len(b))
 # print(len(c))
 # print(d)
