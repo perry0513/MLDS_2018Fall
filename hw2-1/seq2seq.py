@@ -130,6 +130,7 @@ class Seq2seq():
 		_, loss, summary = sess.run([self.train_op, self.loss, self.summary_op], feed_dict=feed_dict)
 		return loss, summary
 
+
 	def test_predict(self, sess, encoder_inputs, decoder_inputs, decoder_targets, decoder_targets_length):
 		feed_dict = { self.encoder_inputs : encoder_inputs,
 					  self.decoder_inputs : decoder_inputs,
@@ -139,5 +140,4 @@ class Seq2seq():
 		predict = sess.run(decoder_logits_train, feed_dict)
 		return predict
 
- 
 
