@@ -37,6 +37,40 @@ class DataProcessor():
     def get_decoder_targets(self):
         print('Loading decoder targets . . .')
         return np.array(self.decoder_targets)
+
+    # Get all data needed in training and testing
+    # Returns shuffled & batched video, inputs, and targets
+    def get_shuffle_and_batch(self, batch_size):
+        # Total_data_num: 'train' => 1450, 'test' => 100
+        total_data_num = len(self.decoder_inputs)
+
+        # Sample one sentence from each video
+        sampled_sentence_idx = [ (i, np.random.choice(len(grp_of_sentence))) for i, grp_of_sentence in enumerate(self.decoder_inputs) ]
+        sampled_decoder_inputs = [ self.decoder_inputs[i][idx] for i, idx in sampled_sentence_idx ]
+        sampled_decoder_targets = [ self.decoder_targets[i][idx] for i, idx in sampled_sentence_idx ]
+
+        # Zip idx, inputs, targets together and shuffle
+        zipped = list(zip(range(total_data_num), sampled_decoder_inputs, sampled_decoder_targets))
+        np.random.shuffle(zipped)
+        # Unzip 
+        shuffled_idx, shuffled_inputs, shuffled_targets = [ np.array(tup) for tup in zip(*zipped) ]
+        # Turn index back to video
+        shuffled_videos = [ np.array(self.feat[idx]) for idx in shuffled_idx ]
+        shuffled_targets_length = [ len(target) for target in shuffled_targets ]
+
+        # Batch shuffled_idx, shuffled_inputs, shuffled_targets
+        num_of_batch = total_data_num // batch_size
+        batched_videos  = np.split(np.array(shuffled_videos[: num_of_batch*batch_size ]), num_of_batch)
+        batched_inputs  = np.split(np.array(shuffled_inputs[: num_of_batch*batch_size ]), num_of_batch)
+        batched_targets = np.split(np.array(shuffled_targets[: num_of_batch*batch_size ]), num_of_batch)
+        batched_targets_length = np.split(np.array(shuffled_targets_length[: num_of_batch*batch_size ]), num_of_batch)
+
+        return batched_videos, batched_inputs, batched_targets, batched_targets_length
+
+
+
+
+
     
     #### Process Functions ####
     # returns SHAPE(1450, 80, 4096)
@@ -107,7 +141,9 @@ class DataProcessor():
                 
                 videos_encoded_by_idx.append(captions_encoded_by_idx)
             
-            self.training_data_encoded_by_idx.append(videos_encoded_by_idx) if mode == self.TRAIN else self.testing_data_encoded_by_idx.append(videos_encoded_by_idx)
+            if mode == self.TRAIN: 
+                self.training_data_encoded_by_idx.append(videos_encoded_by_idx)
+            else: self.testing_data_encoded_by_idx.append(videos_encoded_by_idx)
 
 
     def set_decoder_inputs(self):
@@ -120,9 +156,14 @@ class DataProcessor():
         for videos in (self.training_data_encoded_by_idx if self.mode == 'train' else self.testing_data_encoded_by_idx):
             self.decoder_targets.append( np.array([ np.array(captions + [self.EOS]) for captions in videos ] ) )
 
-# TEST
+# # TEST
 # dataprocessor = DataProcessor('test')
 # print(dataprocessor.get_videos().shape)
 # print(dataprocessor.get_dictionary())
-# print(dataprocessor.get_decoder_inputs())
+# print(dataprocessor.get_decoder_inputs().shape)
 # print(dataprocessor.get_decoder_targets().shape)
+# a, b, c, d = dataprocessor.get_shuffle_and_batch(7)
+# print(len(a))
+# print(len(b))
+# print(len(c))
+# print(d)

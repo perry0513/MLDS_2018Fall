@@ -1,21 +1,21 @@
 import numpy as np
 import tensorflow as tf
-import store_data
-import tadpol_helper
+from data_processor import DataProcessor
 from seq2seq import Seq2seq
 import time
 
 
-encoder_input_video = store_data.get_video()
-idx_to_word, indexed_sentence = store_data.get_sentence()
+data_processor = DataProcessor('test')
+idx2word_dict = data_processor.get_dictionary()
 
+# Hyper-parameters
 epochs = 5
 batch_size = 5
 
 rnn_size   = 1024
 num_layers = 1
 feat_size  = 4096
-vocab_size = len(idx_to_word)
+vocab_size = len(idx2word_dict)
 max_encoder_steps = 80
 max_decoder_steps = 50
 embedding_size = rnn_size
@@ -29,13 +29,15 @@ with tf.Session() as sess:
 					mode='train', max_encoder_steps=max_encoder_steps, max_decoder_steps=max_decoder_steps, embedding_size=embedding_size)
 
 	for epoch in epochs:
-		shuffled_video, shuffled_sentences = tadpol_helper.shuffle_and_zip(indexed_sentence, encoder_input_video, batch_size)
-		trainset = list(zip( shuffled_video, shuffled_sentences ))
+		encoder_videos, decoder_inputs, decoder_targets, decoder_targets_length = data_processor.get_shuffle_and_batch()
 
-		for step, (batch_video, batch_sentences) in enumerate(trainset):
+		trainset = list(zip( encoder_videos, decoder_inputs, decoder_targets ))
+
+		for step, (batch_videos, batch_dec_inputs, batch_dec_targets, batch_dec_targets_len) in enumerate(trainset):
 			np.transpose(batch_video, [1,0,2])
-			model.train(sess, batch_video, batch_sentences)
-
+			loss, summary = model.train(sess=sess, encoder_inputs=batch_videos, decoder_inputs=batch_dec_inputs,
+										decoder_targets=batch_dec_targets , decoder_targets_length=batch_dec_targets_len )
+			print(summary)
 
 
 	model.saver.save(sess, './model/' + time.strftime("%m%d%Y_%H%M", time.localtime()))
