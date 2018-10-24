@@ -21,6 +21,8 @@ class Seq2seq():
 
 		self.build_model()
 
+		self.saver = tf.train.Saver(tf.global_variables(), max_to_keep=50)
+
 	def build_model(self):
 		# Model input & output
 
@@ -88,14 +90,17 @@ class Seq2seq():
 
 		decoder_outputs, _, _ = tf.contrib.seq2seq.dynamic_decode(
 										decoder=training_decoder, 
-										output_time_major=True,
+										output_time_major=False,
 										impute_finished=True, 
 										maximum_iterations=max_target_sequence_length)
 
 		# Calculate loss with sequence_loss
 		print ('decoder_outputs.rnn_output: ', decoder_outputs.rnn_output)
+		print ('decoder_outputs.sample_id: ', decoder_outputs.sample_id)
 		decoder_logits_train = tf.identity(decoder_outputs.rnn_output)
 		self.decoder_predict_train = tf.argmax(decoder_logits_train, axis=-1, name='decoder_pred_train')
+		# decoder_logits_train = tf.transpose(decoder_logits_train, [1,0,2])
+		
 
 		print ('decoder_logits_train: ',decoder_logits_train.shape)
 		print ('decoder_targets: ',self.decoder_targets.shape)
