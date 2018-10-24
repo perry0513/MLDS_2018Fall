@@ -30,6 +30,7 @@ with tf.Session() as sess:
 	sess.run(tf.global_variables_initializer())
 
 	for epoch in range(epochs):
+		print ('EPOCH ' + str(epoch+1) + ':')
 		encoder_videos, decoder_inputs, decoder_targets, decoder_targets_length = data_processor.get_shuffle_and_batch(batch_size)
 
 		trainset = list(zip( encoder_videos, decoder_inputs, decoder_targets, decoder_targets_length ))
