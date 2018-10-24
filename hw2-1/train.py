@@ -9,7 +9,7 @@ import time
 epochs = 1
 batch_size = 10 
 
-mode = 'test'
+mode = 'train'
 rnn_size   = 1024
 num_layers = 1
 feat_size  = 4096
@@ -36,9 +36,9 @@ with tf.Session() as sess:
 
 		for step, (batch_videos, batch_dec_inputs, batch_dec_targets, batch_dec_targets_len) in enumerate(trainset):
 			batch_videos = np.transpose(batch_videos, [1,0,2])
-			loss, summary = model.train(sess=sess, encoder_inputs=batch_videos, decoder_inputs=batch_dec_inputs,
-										decoder_targets=batch_dec_targets , decoder_targets_length=batch_dec_targets_len )
-			print ('loss: ', loss)
+			loss = model.train(sess=sess, encoder_inputs=batch_videos, decoder_inputs=batch_dec_inputs,
+							   decoder_targets=batch_dec_targets , decoder_targets_length=batch_dec_targets_len)
+			print ('Step: {:>3} | Loss: {:.6f}'.format(step, loss))
 
 
 	model.saver.save(sess, './model/' + time.strftime("%m%d%Y_%H%M", time.localtime()))
