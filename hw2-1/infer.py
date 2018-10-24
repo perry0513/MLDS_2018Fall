@@ -39,7 +39,7 @@ with tf.Session() as sess:
 		encoder_videos, decoder_inputs, decoder_targets, decoder_targets_length = data_processor.get_shuffle_and_batch(batch_size)
 
 		for step, batch_videos in enumerate(encoder_videos):
-			np.transpose(batch_videos, [1,0,2])
+			batch_videos = np.transpose(batch_videos, [1,0,2])
 			predict, logits = model.infer(sess=sess, encoder_inputs=batch_videos)
 
 
