@@ -15,7 +15,7 @@ num_layers = 1
 feat_size  = 4096
 max_encoder_steps = 80
 max_decoder_steps = 50
-embedding_size = rnn_size
+embedding_size = 128
 
 data_processor = DataProcessor(mode)
 idx2word_dict = data_processor.get_dictionary()
@@ -38,7 +38,7 @@ with tf.Session() as sess:
 			batch_videos = np.transpose(batch_videos, [1,0,2])
 			loss, summary = model.train(sess=sess, encoder_inputs=batch_videos, decoder_inputs=batch_dec_inputs,
 										decoder_targets=batch_dec_targets , decoder_targets_length=batch_dec_targets_len )
-			print(summary)
+			print ('loss: ', loss)
 
 
 	model.saver.save(sess, './model/' + time.strftime("%m%d%Y_%H%M", time.localtime()))
