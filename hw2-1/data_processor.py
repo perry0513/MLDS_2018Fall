@@ -66,6 +66,7 @@ class DataProcessor():
         batched_targets_length = np.split(np.array(shuffled_targets_length[: num_of_batch*batch_size ]), num_of_batch)
 
         # shape = (number_of_batch, batch_size, ...)
+        print (len(batched_targets))
         return batched_videos, batched_inputs, batched_targets, batched_targets_length
 
 

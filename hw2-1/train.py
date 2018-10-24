@@ -6,8 +6,8 @@ import time
 
 
 # Hyper-parameters
-epochs = 5
-batch_size = 5
+epochs = 1
+batch_size = 10 
 
 mode = 'test'
 rnn_size   = 1024
@@ -20,7 +20,7 @@ embedding_size = 128
 data_processor = DataProcessor(mode)
 idx2word_dict = data_processor.get_dictionary()
 vocab_size = len(idx2word_dict)
-
+print (vocab_size)
 
 model = Seq2seq(rnn_size=rnn_size, num_layers=num_layers, feat_size=feat_size, batch_size=batch_size, vocab_size=vocab_size, 
 				mode=mode, max_encoder_steps=max_encoder_steps, max_decoder_steps=max_decoder_steps, embedding_size=embedding_size)
