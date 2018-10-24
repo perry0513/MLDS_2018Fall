@@ -42,7 +42,7 @@ class Seq2seq():
 		encoder_cell = self._create_cell()
 
 		encoder_outputs, encoder_final_state = tf.nn.dynamic_rnn(encoder_cell, self.encoder_inputs, dtype = tf.float32, time_major = True)
-
+		encoder_outputs = tf.transpose(encoder_outputs, [1,0,2])
 		# Decoder
 
 		# Decoder cell with attention
@@ -88,14 +88,17 @@ class Seq2seq():
 
 		decoder_outputs, _, _ = tf.contrib.seq2seq.dynamic_decode(
 										decoder=training_decoder, 
+										output_time_major=True,
 										impute_finished=True, 
 										maximum_iterations=max_target_sequence_length)
 
 		# Calculate loss with sequence_loss
+		print ('decoder_outputs.rnn_output: ', decoder_outputs.rnn_output)
 		decoder_logits_train = tf.identity(decoder_outputs.rnn_output)
 		self.decoder_predict_train = tf.argmax(decoder_logits_train, axis=-1, name='decoder_pred_train')
 
-
+		print ('decoder_logits_train: ',decoder_logits_train.shape)
+		print ('decoder_targets: ',self.decoder_targets.shape)
 		self.loss = tf.contrib.seq2seq.sequence_loss(
 							logits=decoder_logits_train, 
 							targets=self.decoder_targets, 
