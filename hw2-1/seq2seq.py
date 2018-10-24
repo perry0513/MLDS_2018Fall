@@ -45,9 +45,12 @@ class Seq2seq():
 		encoder_cell = self._create_cell()
 
 		encoder_outputs, encoder_final_state = tf.nn.dynamic_rnn(encoder_cell, self.encoder_inputs, dtype = tf.float32, time_major = True)
-		if self.mode != 'train':
+		encoder_outputs = tf.transpose(encoder_outputs, [1,0,2]) # shape(batch_size,max_step,rnn_size)
+
+		if self.mode == 'test':
 			encoder_outputs = tf.contrib.seq2seq.tile_batch(encoder_outputs, multiplier=self.beam_size)
-		encoder_outputs = tf.transpose(encoder_outputs, [1,0,2])
+		
+
 		# Decoder
 
 		# Decoder cell with attention
@@ -89,7 +92,6 @@ class Seq2seq():
 
 			decoder_outputs, _, _ = tf.contrib.seq2seq.dynamic_decode(
 											decoder=training_decoder, 
-											output_time_major=False,
 											impute_finished=True, 
 											maximum_iterations=max_target_sequence_length)
 
@@ -123,13 +125,12 @@ class Seq2seq():
 
 			# 如果使用beam_search，则需要将encoder的输出进行tile_batch，其实就是复制beam_size份。
 			# encoder_outputs = tf.contrib.seq2seq.tile_batch(encoder_outputs, multiplier=self.beam_size)
-
+			
 			encoder_final_state = tf.contrib.framework.nest.map_structure(lambda s: tf.contrib.seq2seq.tile_batch(s, self.beam_size), encoder_final_state)
-
+			
 			batch_size = self.batch_size * self.beam_size
 
 			decoder_initial_state = decoder_cell.zero_state(batch_size=batch_size, dtype=tf.float32).clone(cell_state=encoder_final_state)
-
 
 			inference_decoder = tf.contrib.seq2seq.BeamSearchDecoder(
 											cell=decoder_cell,

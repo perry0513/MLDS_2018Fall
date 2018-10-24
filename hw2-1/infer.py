@@ -39,8 +39,14 @@ with tf.Session() as sess:
 		encoder_videos, decoder_inputs, decoder_targets, decoder_targets_length = data_processor.get_shuffle_and_batch(batch_size)
 
 		for step, batch_videos in enumerate(encoder_videos):
-			np.transpose(batch_videos, [1,0,2])
+			batch_videos = np.transpose(batch_videos, [1,0,2])
 			predict, logits = model.infer(sess=sess, encoder_inputs=batch_videos)
+			predict = np.transpose(predict, [0,2,1])
+			for batch in predict:
+				for beam in batch:
+					sentence = [ idx2word_dict[word] for word in beam ]
+					print ( ' '.join(sentence) )
+
 
 
 
