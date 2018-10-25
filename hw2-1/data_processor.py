@@ -40,9 +40,9 @@ class DataProcessor():
 
 	# Get all data needed in training and testing
 	# Returns shuffled & batched video, inputs, and targets
-	def get_shuffle_and_batch(self, batch_size):
+	def get_batch(self, batch_size, shuffle):
 		# Total_data_num: 'train' => 1450, 'test' => 100
-		total_data_num = len(self.decoder_inputs)
+		total_data_num = len(self.feat)
 
 		# Sample one sentence from each video
 		sampled_sentence_idx = [ (i, np.random.choice(len(grp_of_sentence))) for i, grp_of_sentence in enumerate(self.decoder_inputs) ]
@@ -51,7 +51,7 @@ class DataProcessor():
 
 		# Zip idx, inputs, targets together and shuffle
 		zipped = list(zip(range(total_data_num), sampled_decoder_inputs, sampled_decoder_targets))
-		np.random.shuffle(zipped)
+		if shuffle: np.random.shuffle(zipped)
 		# Unzip 
 		shuffled_idx, shuffled_inputs, shuffled_targets = [ np.array(tup) for tup in zip(*zipped) ]
 		# Turn index back to video
@@ -66,10 +66,12 @@ class DataProcessor():
 		batched_targets_length = np.split(np.array(shuffled_targets_length[: num_of_batch*batch_size ]), num_of_batch)
 
 		# shape = (number_of_batch, batch_size, ...)
-		print (len(batched_targets))
 		return batched_videos, batched_inputs, batched_targets, batched_targets_length
 
-
+	def get_batch_infer_data(self, batch_size):
+		num_of_batch = len(self.feat) // batch_size
+		batched_videos = np.split(np.array(self.feat[: num_of_batch*batch_size ]), num_of_batch)
+		return batched_videos
 
 
 
