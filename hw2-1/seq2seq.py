@@ -31,7 +31,9 @@ class Seq2seq():
 		# shape = (num_of_sentence, decoder_hidden_units)
 		self.decoder_inputs  = tf.placeholder(shape=(None, None), dtype=tf.int32, name='decoder_inputs')
 		self.decoder_targets = tf.placeholder(shape=(None, None), dtype=tf.int32, name='decoder_targets') 
-		self.decoder_targets_length = tf.placeholder(tf.int32, [None], name='decoder_targets_length')
+		self.decoder_targets_length = tf.placeholder(shape=[None], dtype=tf.int32, name='decoder_targets_length')
+
+		self.keep_prob_placeholder = tf.placeholder(dtype=tf.float32)
 
 		# embeddings
 
@@ -145,7 +147,7 @@ class Seq2seq():
 	def _create_cell(self):
 		def single_cell():
 			cell = tf.contrib.rnn.LSTMCell(self.rnn_size)
-			# cell = tf.contrib.rnn.DropoutWrapper(single_cell, output_keep_prob=self.keep_prob_placeholder, seed=9487)
+			cell = tf.contrib.rnn.DropoutWrapper(cell, output_keep_prob=self.keep_prob_placeholder, seed=9487)
 			return cell
 		cell = tf.contrib.rnn.MultiRNNCell([ single_cell() for _ in range(self.num_layers) ])
 		return cell
@@ -155,7 +157,8 @@ class Seq2seq():
 		feed_dict = { self.encoder_inputs : encoder_inputs,
 					  self.decoder_inputs : decoder_inputs,
 					  self.decoder_targets : decoder_targets,
-					  self.decoder_targets_length : decoder_targets_length }
+					  self.decoder_targets_length : decoder_targets_length,
+					  self.keep_prob_placeholder : 0.8 }
 
 		_, loss = sess.run([self.train_op, self.loss], feed_dict=feed_dict)
 		return loss
@@ -171,7 +174,8 @@ class Seq2seq():
 	# 	return loss
 
 	def infer(self, sess, encoder_inputs):
-		feed_dict = { self.encoder_inputs : encoder_inputs }
+		feed_dict = { self.encoder_inputs : encoder_inputs,
+					  self.keep_prob_placeholder : 1.0 }
 
 		predict, logits = sess.run([self.decoder_predict_decode, self.decoder_predict_logits], feed_dict=feed_dict)
 		return predict, logits
