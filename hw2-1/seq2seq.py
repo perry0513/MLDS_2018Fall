@@ -1,7 +1,6 @@
 import numpy as np
 import tensorflow as tf
-# from pprint import pprint
-# import skvideo.io 
+
 
 tf.reset_default_graph()
 sess = tf.InteractiveSession()
@@ -45,8 +44,8 @@ class Seq2seq():
 		encoder_cell = self._create_cell()
 
 		encoder_outputs, encoder_final_state = tf.nn.dynamic_rnn(encoder_cell, self.encoder_inputs, dtype = tf.float32, time_major = True)
-		encoder_outputs = tf.transpose(encoder_outputs, [1,0,2]) # shape(batch_size,max_step,rnn_size)
 
+		encoder_outputs = tf.transpose(encoder_outputs, [1,0,2]) # shape(batch_size,max_step,rnn_size)
 		if self.mode == 'test':
 			encoder_outputs = tf.contrib.seq2seq.tile_batch(encoder_outputs, multiplier=self.beam_size)
 		
@@ -96,15 +95,11 @@ class Seq2seq():
 											maximum_iterations=max_target_sequence_length)
 
 			# Calculate loss with sequence_loss
-			print ('decoder_outputs.rnn_output: ', decoder_outputs.rnn_output)
-			print ('decoder_outputs.sample_id: ', decoder_outputs.sample_id)
 			decoder_logits_train = tf.identity(decoder_outputs.rnn_output)
 			self.decoder_predict_train = tf.argmax(decoder_logits_train, axis=-1, name='decoder_pred_train')
 			# decoder_logits_train = tf.transpose(decoder_logits_train, [1,0,2])
 			
 
-			print ('decoder_logits_train: ',decoder_logits_train.shape)
-			print ('decoder_targets: ',self.decoder_targets.shape)
 			self.loss = tf.contrib.seq2seq.sequence_loss(
 								logits=decoder_logits_train, 
 								targets=self.decoder_targets, 
@@ -118,19 +113,12 @@ class Seq2seq():
 
 
 		else:
-			# inference_helper = tf.contrib.seq2seq.GreedyEmbeddingHelper(
-			# 								embedding=embeddings, 
-			# 								start_tokens=tf.fill([self.batch_size], 1), 
-			# 								end_token=2) 								# <EOS> = 2
-
 			# 如果使用beam_search，则需要将encoder的输出进行tile_batch，其实就是复制beam_size份。
-			# encoder_outputs = tf.contrib.seq2seq.tile_batch(encoder_outputs, multiplier=self.beam_size)
-			
-			encoder_final_state = tf.contrib.framework.nest.map_structure(lambda s: tf.contrib.seq2seq.tile_batch(s, self.beam_size), encoder_final_state)
-			
+			self.tiled_encoder_final_state = tf.contrib.seq2seq.tile_batch(encoder_final_state, multiplier=self.beam_size)
+
 			batch_size = self.batch_size * self.beam_size
 
-			decoder_initial_state = decoder_cell.zero_state(batch_size=batch_size, dtype=tf.float32).clone(cell_state=encoder_final_state)
+			decoder_initial_state = decoder_cell.zero_state(batch_size=batch_size, dtype=tf.float32).clone(cell_state=self.tiled_encoder_final_state)
 
 			inference_decoder = tf.contrib.seq2seq.BeamSearchDecoder(
 											cell=decoder_cell,
@@ -172,6 +160,15 @@ class Seq2seq():
 		_, loss = sess.run([self.train_op, self.loss], feed_dict=feed_dict)
 		return loss
 
+	# def validate(self, sess, encoder_inputs, decoder_inputs, decoder_targets, decoder_targets_length):
+	# 	feed_dict = { self.encoder_inputs : encoder_inputs,
+	# 				  self.decoder_inputs : decoder_inputs,
+	# 				  self.decoder_targets : decoder_targets,
+	# 				  self.decoder_targets_length : decoder_targets_length }
+
+	# 	predict = sess.run(self.decoder_predict_train, feed_dict=feed_dict)
+	# 	print(predict.shape)
+	# 	return loss
 
 	def infer(self, sess, encoder_inputs):
 		feed_dict = { self.encoder_inputs : encoder_inputs }

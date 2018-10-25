@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 from data_processor import DataProcessor
 from seq2seq import Seq2seq
-import time
+from tqdm import tqdm
 
 
 # Hyper-parameters
@@ -24,7 +24,8 @@ vocab_size = len(idx2word_dict)
 
 model_dir = './model/'
 
-
+filename = open('./MLDS_hw2_1_data/testing_data/id.txt', 'r').read().splitlines()
+output_file = open('./MLDS_hw2_1_data/output.txt', 'w')
 
 with tf.Session() as sess:
 	model = Seq2seq(rnn_size=rnn_size, num_layers=num_layers, feat_size=feat_size, batch_size=batch_size, vocab_size=vocab_size, mode=mode, 
@@ -35,17 +36,21 @@ with tf.Session() as sess:
 		print ('Reloading model parameters...')
 		model.saver.restore(sess, ckpt.model_checkpoint_path)
 
-	for epoch in range(epochs):
-		encoder_videos, decoder_inputs, decoder_targets, decoder_targets_length = data_processor.get_shuffle_and_batch(batch_size)
+	encoder_videos = data_processor.get_batch_infer_data(batch_size)
+	vid_num = 0
 
-		for step, batch_videos in enumerate(encoder_videos):
-			batch_videos = np.transpose(batch_videos, [1,0,2])
-			predict, logits = model.infer(sess=sess, encoder_inputs=batch_videos)
-			predict = np.transpose(predict, [0,2,1])
-			for batch in predict:
-				for beam in batch:
-					sentence = [ idx2word_dict[word] for word in beam ]
-					print ( ' '.join(sentence) )
+	for step, batch_videos in enumerate(tqdm(encoder_videos)):
+		batch_videos = np.transpose(batch_videos, [1,0,2])
+		predict, logits = model.infer(sess=sess, encoder_inputs=batch_videos)
+		predict = np.transpose(predict, [0,2,1])
+		for batch in predict:
+			sentence = [ idx2word_dict[word] for word in batch[0] ]
+			sentence = ' '.join(sentence)
+			sentence = sentence.strip(' <EOS>')
+			sentence = sentence[0].upper() + sentence[1:]
+			
+			output_file.write(filename[vid_num] + ',' + sentence + '\n')
+			vid_num += 1
 
 
 
