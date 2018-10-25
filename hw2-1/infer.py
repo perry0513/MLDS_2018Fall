@@ -6,7 +6,6 @@ from tqdm import tqdm
 
 
 # Hyper-parameters
-epochs = 1
 batch_size = 10 
 
 mode = 'test'
