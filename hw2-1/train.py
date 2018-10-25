@@ -6,7 +6,7 @@ import time
 
 
 # Hyper-parameters
-epochs = 1
+epochs = 5
 batch_size = 10 
 
 mode = 'train'
