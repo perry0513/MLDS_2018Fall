@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 
 # Hyper-parameters
-batch_size = 10 
+batch_size = 25
 
 mode = 'test'
 rnn_size   = 1024
@@ -15,7 +15,7 @@ feat_size  = 4096
 max_encoder_steps = 80
 max_decoder_steps = 50
 beam_size = 3
-embedding_size = 128
+embedding_size = 256
 
 data_processor = DataProcessor(mode)
 idx2word_dict = data_processor.get_dictionary()
