@@ -1,6 +1,6 @@
 hw2-1/MLDS_hw2_1_data/
 hw2-2/MLDS_hw2_2_data/
 *.DStore
-hw2-1/__pycache__/
-hw2-1/code_not_used/
+*__pycache__/
 hw2-1/model/
+
