@@ -1,5 +1,6 @@
 import numpy as np
 import tensorflow as tf
+from gensim.models import Word2Vec
 
 
 tf.reset_default_graph()
@@ -27,25 +28,48 @@ class Seq2seq():
 		# Model input & output
 
 		# shape = (batch_size, encoder_hidden_units, input_size)
-		self.encoder_inputs  = tf.placeholder(shape=(None, None, 4096), dtype=tf.float32, name='encoder_inputs')
+		self.encoder_inputs  = tf.placeholder(shape=(None, None), dtype=tf.float32, name='encoder_inputs')
+		self.encoder_inputs_length = tf.placeholder(shape=[None], dtype=tf.int32, name='encoder_inputs_length')
 		# shape = (num_of_sentence, decoder_hidden_units)
 		self.decoder_inputs  = tf.placeholder(shape=(None, None), dtype=tf.int32, name='decoder_inputs')
 		self.decoder_targets = tf.placeholder(shape=(None, None), dtype=tf.int32, name='decoder_targets') 
 		self.decoder_targets_length = tf.placeholder(shape=[None], dtype=tf.int32, name='decoder_targets_length')
 
 		self.keep_prob_placeholder = tf.placeholder(dtype=tf.float32)
+		self.sampling_probability = tf.placeholder(dtype=tf.float32)
 
-		# embeddings
 
-		embeddings = tf.Variable(tf.random_uniform([self.vocab_size, self.embedding_size], -1.0, 1.0), dtype = tf.float32)
+
+		# embeddings (gensin word2vec)
+		w2v_model = Word2Vec.load("word2vec.model")
+		w2v_embedding = np.zeros([len(w2v_model.wv.index2word), self.embedding_size])
+		for idx, word in enumerate(w2v_model.wv.index2word):
+			w2v_embedding[idx, :] = w2v_model[word]
+		embeddings = tf.Variable(tf.convert_to_tensor(w2v_embedding, np.float32), trainable=False, name='embedding')
+
+		encoder_inputs_embedded = tf.nn.embedding_lookup(embeddings, self.encoder_inputs)
+#####??????
+		encoder_inputs_embedded = tf.transpose(encoder_inputs_embedded, [1,0,2])
+#####??????
+		# embeddings = tf.Variable(tf.random_uniform([self.vocab_size, self.embedding_size], -1.0, 1.0), dtype = tf.float32)
+
+
 		decoder_inputs_embedded = tf.nn.embedding_lookup(embeddings, self.decoder_inputs)
 		decoder_inputs_embedded = tf.transpose(decoder_inputs_embedded, [1,0,2])
 
 		# Encoder
 
-		encoder_cell = self._create_cell()
-
-		encoder_outputs, encoder_final_state = tf.nn.dynamic_rnn(encoder_cell, self.encoder_inputs, dtype = tf.float32, time_major = True)
+		# encoder_cell = self._create_cell()
+		# encoder_outputs, encoder_final_state = tf.nn.dynamic_rnn(encoder_cell, self.encoder_inputs, dtype = tf.float32, time_major = True)
+#####???
+		encoder_outputs, encoder_final_state = tf.nn.bidirectional_dynamic_rnn(
+														cell_fw=self._create_cell(),
+														cell_bw=self._create_cell(), 
+														inputs=self.encoder_inputs,
+														sequence_length=self.encoder_inputs_length,
+														dtype=tf.float32,
+														time_major=True )
+#####???
 
 		encoder_outputs = tf.transpose(encoder_outputs, [1,0,2]) # shape(batch_size,max_step,rnn_size)
 		if self.mode == 'test':
@@ -79,12 +103,19 @@ class Seq2seq():
 		# Define helper based on 'train' or 'infer' mode
 		if self.mode == 'train':
 			decoder_initial_state = decoder_cell.zero_state(batch_size=self.batch_size, dtype=tf.float32).clone(cell_state=encoder_final_state)
-
-			training_helper = tf.contrib.seq2seq.TrainingHelper(
-											inputs=decoder_inputs_embedded, 
+#####???
+			training_helper = tf.contrib.seq2seq.ScheduledEmbeddingTrainingHelper(
+											inputs=decoder_inputs_embedded,
 											sequence_length=self.decoder_targets_length,
-											# memory_sequence_length=?????????, 
-											time_major=True, name='training_helper')
+											embedding=embeddings,
+											sampling_probability=self.sampling_probability,
+											time_major=True)
+#####???
+			# training_helper = tf.contrib.seq2seq.TrainingHelper(
+			# 								inputs=decoder_inputs_embedded, 
+			# 								sequence_length=self.decoder_targets_length,
+			# 								# memory_sequence_length=?????????, 
+			# 								time_major=True, name='training_helper')
 			# Decoder
 			training_decoder = tf.contrib.seq2seq.BasicDecoder(
 											cell=decoder_cell, helper=training_helper, 
@@ -103,9 +134,9 @@ class Seq2seq():
 			
 
 			self.loss = tf.contrib.seq2seq.sequence_loss(
-								logits=decoder_logits_train, 
-								targets=self.decoder_targets, 
-								weights=mask)
+									logits=decoder_logits_train, 
+									targets=self.decoder_targets, 
+									weights=mask)
 			optimizer = tf.train.AdamOptimizer()
 
 			# Clip gradient if gradient is too large
@@ -147,31 +178,23 @@ class Seq2seq():
 	def _create_cell(self):
 		def single_cell():
 			cell = tf.contrib.rnn.LSTMCell(self.rnn_size)
-			cell = tf.contrib.rnn.DropoutWrapper(cell, output_keep_prob=self.keep_prob_placeholder, seed=9487)
+			cell = tf.contrib.rnn.DropoutWrapper(cell, output_keep_prob=self.keep_prob_placeholder)
 			return cell
 		cell = tf.contrib.rnn.MultiRNNCell([ single_cell() for _ in range(self.num_layers) ])
 		return cell
 
 
-	def train(self, sess, encoder_inputs, decoder_inputs, decoder_targets, decoder_targets_length):
+	def train(self, sess, encoder_inputs, decoder_inputs, decoder_targets, decoder_targets_length, sampling_probability):
 		feed_dict = { self.encoder_inputs : encoder_inputs,
 					  self.decoder_inputs : decoder_inputs,
 					  self.decoder_targets : decoder_targets,
 					  self.decoder_targets_length : decoder_targets_length,
+					  self.sampling_probability : sampling_probability,
 					  self.keep_prob_placeholder : 0.8 }
 
 		_, loss = sess.run([self.train_op, self.loss], feed_dict=feed_dict)
 		return loss
 
-	# def validate(self, sess, encoder_inputs, decoder_inputs, decoder_targets, decoder_targets_length):
-	# 	feed_dict = { self.encoder_inputs : encoder_inputs,
-	# 				  self.decoder_inputs : decoder_inputs,
-	# 				  self.decoder_targets : decoder_targets,
-	# 				  self.decoder_targets_length : decoder_targets_length }
-
-	# 	predict = sess.run(self.decoder_predict_train, feed_dict=feed_dict)
-	# 	print(predict.shape)
-	# 	return loss
 
 	def infer(self, sess, encoder_inputs):
 		feed_dict = { self.encoder_inputs : encoder_inputs,
