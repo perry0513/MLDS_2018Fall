@@ -11,8 +11,18 @@ class DataProcessor():
 
 	def __init__(self, min_count=20):
 		self.min_count = min_count
+		self.question_list = []
+		self.answer_list = []
+		self.encoder_inputs  = []
+		self.decoder_inputs  = []
+		self.decoder_targets = []
+		self.encoder_inputs_length = []
+		self.decoder_targets_length = []
 		self.load_conversations()
 		self.build_dictionary()
+
+	def get_dictionary(self):
+		return idx2word_dictionary
 
 	def get_batch(self, batch_size=10):
 		total_data_num = len(self.question_list)
@@ -30,9 +40,6 @@ class DataProcessor():
 		return batched_encoder_inputs, batched_encoder_inputs_length, batched_decoder_inputs, batched_decoder_targets, batched_decoder_targets_length
 
 	def encode_train_data(self):
-		self.encoder_inputs  = []
-		self.decoder_inputs  = []
-		self.decoder_targets = []
 		for line in self.question_list:
 			encoded_line = []
 			for word in line.split(' '):
@@ -69,8 +76,6 @@ class DataProcessor():
 			self.EOS: '<EOS>',
 			self.UNK: '<UNK>'
 		}
-		self.encoder_inputs_length = []
-		self.decoder_targets_length = []
 		word_counts = {}
 		current_dictionary_idx = 4
 		self.max_seq_length = 0
@@ -97,8 +102,6 @@ class DataProcessor():
 
 	def load_conversations(self):
 		# load conversation for building dictionary
-		self.question_list = []
-		self.answer_list = []
 		with open(self.question_data_path, 'r', encoding='utf8') as f:
 			for line in f:
 				line = line.rstrip()
