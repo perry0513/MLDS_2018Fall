@@ -52,6 +52,8 @@ class Seq2seq():
 		encoder_inputs_embedded = tf.transpose(encoder_inputs_embedded, [1,0,2])
 #####??????
 		# embeddings = tf.Variable(tf.random_uniform([self.vocab_size, self.embedding_size], -1.0, 1.0), dtype = tf.float32)
+
+
 		decoder_inputs_embedded = tf.nn.embedding_lookup(embeddings, self.decoder_inputs)
 		decoder_inputs_embedded = tf.transpose(decoder_inputs_embedded, [1,0,2])
 

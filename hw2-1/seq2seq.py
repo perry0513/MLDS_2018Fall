@@ -110,7 +110,7 @@ class Seq2seq():
 
 			# Clip gradient if gradient is too large
 			gradients = optimizer.compute_gradients(self.loss)
-			capped_gradients = [ (tf.clip_by_value(grad, -1., 1.), var) for grad, var in gradients if grad is not None ]
+			capped_gradients = [ (tf.clip_by_value(grad, -0.3, 0.3), var) for grad, var in gradients if grad is not None ]
 			self.train_op = optimizer.apply_gradients(capped_gradients)
 
 
