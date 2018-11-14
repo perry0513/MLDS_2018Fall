@@ -12,18 +12,17 @@ batch_size = 25
 mode = 'train'
 rnn_size   = 1024
 num_layers = 1
-feat_size  = 4096
-max_encoder_steps = 80
-max_decoder_steps = 50
+max_encoder_steps = 30
+max_decoder_steps = 30
 embedding_size = 256
 
-data_processor = DataProcessor(mode)
+data_processor = DataProcessor()
 idx2word_dict = data_processor.get_dictionary()
 vocab_size = len(idx2word_dict)
 
 
-model = Seq2seq(rnn_size=rnn_size, num_layers=num_layers, feat_size=feat_size, batch_size=batch_size, vocab_size=vocab_size, 
-				mode=mode, max_encoder_steps=max_encoder_steps, max_decoder_steps=max_decoder_steps, embedding_size=embedding_size)
+model = Seq2seq(rnn_size=rnn_size, num_layers=num_layers, batch_size=batch_size, vocab_size=vocab_size, mode=mode, 
+				max_encoder_steps=max_encoder_steps, max_decoder_steps=max_decoder_steps, embedding_size=embedding_size)
 
 # sampling probability for each epoch
 sampling_prob = [ 0 for x in range(epochs) ]
@@ -33,8 +32,9 @@ with tf.Session() as sess:
 	sess.run(tf.global_variables_initializer())
 
 	for epoch in range(epochs):
-		encoder_inputs, encoder_inputs_length, decoder_inputs, decoder_targets, 
-		decoder_targets_length = data_processor.get_batch(batch_size, shuffle=True)
+		encoder_inputs, encoder_inputs_length, decoder_inputs, decoder_targets, decoder_targets_length = data_processor.get_batch(batch_size)
+
+		print(encoder_inputs[0][0])
 
 		trainset = list(zip( encoder_inputs, encoder_inputs_length, decoder_inputs, decoder_targets, decoder_targets_length ))
 

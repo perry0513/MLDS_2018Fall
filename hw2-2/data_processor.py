@@ -28,7 +28,7 @@ class DataProcessor():
 		total_data_num = len(self.question_list)
 		zipped = list(zip(self.encoder_inputs, self.encoder_inputs_length, self.decoder_inputs, self.decoder_targets, self.decoder_targets_length))
 		np.random.shuffle(zipped)
-		(shuffled_encoder_inputs, shuffled_encoder_inputs_length, shuffled_decoder_inputs,shuffled_decoder_targets, shuffled_decoder_targets_length) = [ np.array(tup) for tup in zip(*zipped) ]
+		(shuffled_encoder_inputs, shuffled_encoder_inputs_length, shuffled_decoder_inputs, shuffled_decoder_targets, shuffled_decoder_targets_length) = [ np.array(tup) for tup in zip(*zipped) ]
 
 		num_of_batch = total_data_num // batch_size
 		batched_encoder_inputs  = np.split(np.array(shuffled_encoder_inputs[: num_of_batch*batch_size ]), num_of_batch)
@@ -115,6 +115,5 @@ class DataProcessor():
 		print ("Loading conversations finished. ")
 
 
-dp = DataProcessor()
-print (len(dp.idx2word_dictionary))
-print (dp.max_seq_length)
+# dp = DataProcessor()
+# print (len(dp.idx2word_dictionary))
