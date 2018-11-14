@@ -74,12 +74,10 @@ class DataProcessor():
 			self.decoder_targets.append(np.array(encoded_line + [self.PAD]*(self.max_seq_length - len(encoded_line)) + [self.EOS] ))
 
 			if self.decoder_inputs[-1].shape[0] != 28 or self.decoder_targets[-1].shape[0] != 28:
-				print("======== ERROR ========")
+				print("======== ERROR ========",i)
 				print(self.max_seq_length)
 				print(self.decoder_inputs[-1].shape[0])
 				print(self.decoder_targets[-1].shape[0])
-
-
 
 	def build_dictionary(self):
 		print('Building dictionary . . .')
