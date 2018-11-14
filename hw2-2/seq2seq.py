@@ -7,11 +7,10 @@ tf.reset_default_graph()
 sess = tf.InteractiveSession()
 
 class Seq2seq():
-	def __init__(self, rnn_size, num_layers, feat_size, batch_size, vocab_size, 
-				 mode, max_encoder_steps, max_decoder_steps, embedding_size, beam_size=0):
+	def __init__(self, rnn_size, num_layers, batch_size, vocab_size, mode, 
+				 max_encoder_steps, max_decoder_steps, embedding_size, beam_size=0):
 		self.rnn_size = rnn_size
 		self.num_layers = num_layers
-		self.feat_size = feat_size
 		self.batch_size = batch_size
 		self.vocab_size = vocab_size
 		self.mode = mode
@@ -27,16 +26,16 @@ class Seq2seq():
 	def build_model(self):
 		# Model input & output
 
-		# shape = (batch_size, encoder_hidden_units, input_size)
-		self.encoder_inputs  = tf.placeholder(shape=(None, None), dtype=tf.float32, name='encoder_inputs')
+		# shape = (batch_size, max_seq_length)
+		self.encoder_inputs  = tf.placeholder(shape=(None, None), dtype=tf.int32, name='encoder_inputs')
 		self.encoder_inputs_length = tf.placeholder(shape=[None], dtype=tf.int32, name='encoder_inputs_length')
-		# shape = (num_of_sentence, decoder_hidden_units)
+		# shape = (batch_size, max_seq_len)
 		self.decoder_inputs  = tf.placeholder(shape=(None, None), dtype=tf.int32, name='decoder_inputs')
 		self.decoder_targets = tf.placeholder(shape=(None, None), dtype=tf.int32, name='decoder_targets') 
 		self.decoder_targets_length = tf.placeholder(shape=[None], dtype=tf.int32, name='decoder_targets_length')
 
 		self.keep_prob_placeholder = tf.placeholder(dtype=tf.float32)
-		self.sampling_probability = tf.placeholder(dtype=tf.float32)
+		self.sampling_probability = tf.placeholder(shape=[], dtype=tf.float32)
 
 
 
@@ -59,16 +58,16 @@ class Seq2seq():
 
 		# Encoder
 
-		# encoder_cell = self._create_cell()
-		# encoder_outputs, encoder_final_state = tf.nn.dynamic_rnn(encoder_cell, self.encoder_inputs, dtype = tf.float32, time_major = True)
+		encoder_cell = self._create_cell()
+		encoder_outputs, encoder_final_state = tf.nn.dynamic_rnn(encoder_cell, encoder_inputs_embedded, dtype = tf.float32, time_major = True)
 #####???
-		encoder_outputs, encoder_final_state = tf.nn.bidirectional_dynamic_rnn(
-														cell_fw=self._create_cell(),
-														cell_bw=self._create_cell(), 
-														inputs=self.encoder_inputs,
-														sequence_length=self.encoder_inputs_length,
-														dtype=tf.float32,
-														time_major=True )
+		# encoder_outputs, encoder_final_state = tf.nn.bidirectional_dynamic_rnn(
+		# 												cell_fw=self._create_cell(),
+		# 												cell_bw=self._create_cell(), 
+		# 												inputs=encoder_inputs_embedded,
+		# 												sequence_length=self.encoder_inputs_length,
+		# 												dtype=tf.float32,
+		# 												time_major=True )
 #####???
 
 		encoder_outputs = tf.transpose(encoder_outputs, [1,0,2]) # shape(batch_size,max_step,rnn_size)
