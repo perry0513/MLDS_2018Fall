@@ -1,2 +1,0 @@
-model_checkpoint_path: "ep_35_bs_25_rnn_1024_lay_1_emb_256"
-all_model_checkpoint_paths: "ep_35_bs_25_rnn_1024_lay_1_emb_256"
