@@ -20,6 +20,7 @@ class DataProcessor():
 		self.decoder_targets_length = []
 		self.load_conversations()
 		self.build_dictionary()
+		self.encode_train_data()
 
 	def get_dictionary(self):
 		return self.idx2word_dictionary
@@ -32,35 +33,35 @@ class DataProcessor():
 
 		num_of_batch = total_data_num // batch_size
 		batched_encoder_inputs  = np.split(np.array(shuffled_encoder_inputs[: num_of_batch*batch_size ]), num_of_batch)
-		batched_decoder_inputs = np.split(np.array(shuffled_decoder_inputs[: num_of_batch*batch_size ]), num_of_batch)
+		batched_decoder_inputs  = np.split(np.array(shuffled_decoder_inputs[: num_of_batch*batch_size ]), num_of_batch)
 		batched_decoder_targets = np.split(np.array(shuffled_decoder_targets[: num_of_batch*batch_size ]), num_of_batch)
 		batched_encoder_inputs_length  = np.split(np.array(shuffled_encoder_inputs_length[: num_of_batch*batch_size ]), num_of_batch)
 		batched_decoder_targets_length = np.split(np.array(shuffled_decoder_targets_length[: num_of_batch*batch_size ]), num_of_batch)
 
 		return batched_encoder_inputs, batched_encoder_inputs_length, batched_decoder_inputs, batched_decoder_targets, batched_decoder_targets_length
 
+
 	def encode_train_data(self):
+		print('Encoding data . . .')
 		for line in self.question_list:
 			encoded_line = []
-			for word in line.split(' '):
+			for word in line:
 				idx = self.word2idx_dictionary.get(word, False)
-				if idx:
-					encoded_line.append(idx)
-				else:
-					encoded_line.append(self.UNK)
+				encoded_line.append(idx if idx else self.UNK)
 			encoded_line = encoded_line + [self.PAD]*(self.max_seq_length-len(encoded_line))
-			self.encoder_inputs.append(encoded_line)
+			self.encoder_inputs.append(np.array(encoded_line))
+
 		for line in self.answer_list:
 			encoded_line = []
-			for word in line.split(' '):
+			for word in line:
 				idx = self.word2idx_dictionary.get(word, False)
-				if idx:
-					encoded_line.append(idx)
-				else:
-					encoded_line.append(self.UNK)
-			self.decoder_targets.append(encoded_line + [self.PAD]*(self.max_seq_length-len(encoded_line)) + [self.EOS])
-			self.decoder_inputs.append([self.BOS] + encoded_line + [self.PAD]*(self.max_seq_length-len(encoded_line)))
+				encoded_line.append(idx if idx else self.UNK)
+			self.decoder_inputs.append(np.array([self.BOS] + encoded_line + [self.PAD]*(self.max_seq_length-len(encoded_line))))
+			self.decoder_targets.append(np.array(encoded_line + [self.PAD]*(self.max_seq_length-len(encoded_line)) + [self.EOS]))
+
+
 	def build_dictionary(self):
+		print('Building dictionary . . .')
 		# init
 		# word2idx_dictionary format: {'word': word_idx}
 		# idx2word_dictionary format: {word_idx: 'word'}
@@ -80,12 +81,11 @@ class DataProcessor():
 		current_dictionary_idx = 4
 		self.max_seq_length = 0
 		for line in self.question_list:
-			split_line = line.split(' ')
-			length = len(split_line)
+			length = len(line)
 			self.encoder_inputs_length.append(length)
 			if length > self.max_seq_length:
 				self.max_seq_length = length
-			for word in split_line:
+			for word in line:
 				if self.word2idx_dictionary.get(word, False):
 					continue
 				count = word_counts.get(word, 0)
@@ -98,21 +98,22 @@ class DataProcessor():
 					self.idx2word_dictionary.update({current_dictionary_idx: word})
 					current_dictionary_idx += 1
 		for line in self.answer_list:
-			self.decoder_targets_length.append(len(line.split(' '))+1)
+			self.decoder_targets_length.append(len(line)+1)
+
 
 	def load_conversations(self):
 		# load conversation for building dictionary
+		print ("Loading conversations . . .")
 		with open(self.question_data_path, 'r', encoding='utf8') as f:
 			for line in f:
 				line = line.rstrip()
 				if line != "":
-					self.question_list.append(line)
+					self.question_list.append(line.split(' '))
 		with open(self.answer_data_path, 'r', encoding='utf8') as f:
 			for line in f:
 				line = line.rstrip()
 				if line != "":
-					self.answer_list.append(line)
-		print ("Loading conversations finished. ")
+					self.answer_list.append(line.split(' '))
 
 
 # dp = DataProcessor()

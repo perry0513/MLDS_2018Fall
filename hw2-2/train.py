@@ -27,19 +27,23 @@ model = Seq2seq(rnn_size=rnn_size, num_layers=num_layers, batch_size=batch_size,
 # sampling probability for each epoch
 sampling_prob = [ 0 for x in range(epochs) ]
 
-
 with tf.Session() as sess:
 	sess.run(tf.global_variables_initializer())
 
 	for epoch in range(epochs):
 		encoder_inputs, encoder_inputs_length, decoder_inputs, decoder_targets, decoder_targets_length = data_processor.get_batch(batch_size)
 
-		print(encoder_inputs[0][0])
-
 		trainset = list(zip( encoder_inputs, encoder_inputs_length, decoder_inputs, decoder_targets, decoder_targets_length ))
 
 		for step, (batch_enc_inputs, batch_enc_inputs_length, batch_dec_inputs, batch_dec_targets, batch_dec_targets_len) in enumerate(trainset):
-			batch_enc_inputs = np.transpose(batch_enc_inputs, [1,0,2])
+			batch_enc_inputs = np.transpose(batch_enc_inputs, [1,0])
+			# for x in batch_dec_inputs:
+			# 	print(x.shape)
+			print(type(batch_enc_inputs))
+			print(type(batch_enc_inputs_length))
+			print(batch_dec_inputs)
+			print(type(batch_dec_targets))
+			print(type(batch_dec_targets_len))
 			loss = model.train(sess=sess, encoder_inputs=batch_enc_inputs, encoder_inputs_length=batch_enc_inputs_length,
 							   decoder_inputs=batch_dec_inputs, decoder_targets=batch_dec_targets, 
 							   decoder_targets_length=batch_dec_targets_len, sampling_probability=sampling_prob[step])
