@@ -5,7 +5,7 @@ class DataProcessor():
 	EOS = 2
 	UNK = 3
 	question_data_path = './MLDS_hw2_2_data/sel_conversation/question.txt'
-	answer_data_path = './MDLS_hw2_2_data/sel_conversation/answer.txt'
+	answer_data_path = './MLDS_hw2_2_data/sel_conversation/answer.txt'
 
 	def __init__(self, min_count=20):
 		self.min_count = min_count

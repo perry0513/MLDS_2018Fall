@@ -184,8 +184,10 @@ class Seq2seq():
 		return cell
 
 
-	def train(self, sess, encoder_inputs, decoder_inputs, decoder_targets, decoder_targets_length, sampling_probability):
+	def train(self, sess, encoder_inputs, encoder_inputs_length, decoder_inputs, 
+			  decoder_targets, decoder_targets_length, sampling_probability):
 		feed_dict = { self.encoder_inputs : encoder_inputs,
+					  self.encoder_inputs_length : encoder_inputs_length,
 					  self.decoder_inputs : decoder_inputs,
 					  self.decoder_targets : decoder_targets,
 					  self.decoder_targets_length : decoder_targets_length,
