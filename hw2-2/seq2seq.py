@@ -26,7 +26,7 @@ class Seq2seq():
 	def build_model(self):
 		# Model input & output
 
-		# shape = (batch_size, max_seq_length)
+		# shape = (batch_size, max_seq_len)
 		self.encoder_inputs  = tf.placeholder(shape=(None, None), dtype=tf.int32, name='encoder_inputs')
 		self.encoder_inputs_length = tf.placeholder(shape=[None], dtype=tf.int32, name='encoder_inputs_length')
 		# shape = (batch_size, max_seq_len)
@@ -47,11 +47,7 @@ class Seq2seq():
 		embeddings = tf.Variable(tf.convert_to_tensor(w2v_embedding, np.float32), trainable=False, name='embedding')
 
 		encoder_inputs_embedded = tf.nn.embedding_lookup(embeddings, self.encoder_inputs)
-#####??????
 		encoder_inputs_embedded = tf.transpose(encoder_inputs_embedded, [1,0,2])
-#####??????
-		# embeddings = tf.Variable(tf.random_uniform([self.vocab_size, self.embedding_size], -1.0, 1.0), dtype = tf.float32)
-
 
 		decoder_inputs_embedded = tf.nn.embedding_lookup(embeddings, self.decoder_inputs)
 		decoder_inputs_embedded = tf.transpose(decoder_inputs_embedded, [1,0,2])
