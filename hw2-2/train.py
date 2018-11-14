@@ -39,11 +39,11 @@ with tf.Session() as sess:
 			batch_enc_inputs = np.transpose(batch_enc_inputs, [1,0])
 			# for x in batch_dec_inputs:
 			# 	print(x.shape)
-			print(type(batch_enc_inputs))
-			print(type(batch_enc_inputs_length))
-			print(batch_dec_inputs)
-			print(type(batch_dec_targets))
-			print(type(batch_dec_targets_len))
+			# print(type(batch_enc_inputs))
+			# print(type(batch_enc_inputs_length))
+			# print(batch_dec_inputs)
+			# print(type(batch_dec_targets))
+			# print(type(batch_dec_targets_len))
 			loss = model.train(sess=sess, encoder_inputs=batch_enc_inputs, encoder_inputs_length=batch_enc_inputs_length,
 							   decoder_inputs=batch_dec_inputs, decoder_targets=batch_dec_targets, 
 							   decoder_targets_length=batch_dec_targets_len, sampling_probability=sampling_prob[step])
