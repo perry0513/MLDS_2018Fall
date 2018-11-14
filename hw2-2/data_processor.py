@@ -21,10 +21,7 @@ class DataProcessor():
 			is_question = True
 			for line in conversation:
 				# unfinished
-				if is_question:
-					
-				else:
-					answer_list.append(line)
+				print ("hello, world")
 			
 	def build_dictionary(self):
 		# init
@@ -45,22 +42,19 @@ class DataProcessor():
 		}
 		word_counts = {}
 		current_dictionary_idx = 4
-		for conversation in self.conversation_list:
-			if len(conversation) <= 1:
-				continue
-			for line in conversation:
-				for word in line.split(' '):
-					if self.word2idx_dictionary.get(word, False):
-						continue
-					count = word_counts.get(word, 0)
-					if count == 0:
-						word_counts.update({word: 1})
-					elif count < self.min_count:
-						word_counts.update({word: count+1})
-					else:
-						self.word2idx_dictionary.update({word: current_dictionary_idx})
-						self.idx2word_dictionary.update({current_dictionary_idx: word})
-						current_dictionary_idx += 1
+		for line in self.question_list:
+			for word in line.split(' '):
+				if self.word2idx_dictionary.get(word, False):
+					continue
+				count = word_counts.get(word, 0)
+				if count == 0:
+					word_counts.update({word: 1})
+				elif count < self.min_count:
+					word_counts.update({word: count+1})
+				else:
+					self.word2idx_dictionary.update({word: current_dictionary_idx})
+					self.idx2word_dictionary.update({current_dictionary_idx: word})
+					current_dictionary_idx += 1
 
 	def load_conversations(self):
 		# load conversation for building dictionary
@@ -70,12 +64,12 @@ class DataProcessor():
 			for line in f:
 				line = line.rstrip()
 				if line != "":
-					question_list.append(line)
+					self.question_list.append(line)
 		with open(self.answer_data_path, 'r', encoding='utf8') as f:
 			for line in f:
 				line = line.rstrip()
 				if line != "":
-					answer_list.append(line)
+					self.answer_list.append(line)
 		print ("Loading conversations finished. ")
 
 
