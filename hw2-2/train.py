@@ -46,7 +46,7 @@ with tf.Session() as sess:
 			# print(type(batch_dec_targets_len))
 			loss = model.train(sess=sess, encoder_inputs=np.array(batch_enc_inputs), encoder_inputs_length=np.array(batch_enc_inputs_length),
 							   decoder_inputs=np.array(batch_dec_inputs), decoder_targets=np.array(batch_dec_targets), 
-							   decoder_targets_length=np.array(batch_dec_targets_len), sampling_probability=sampling_prob[step])
+							   decoder_targets_length=np.array(batch_dec_targets_len), sampling_probability=sampling_prob[epoch])
 			print ('Epoch: {:>2} | Step: {:>3} | Loss: {:.6f}'.format(epoch+1, step+1, loss))
 
 

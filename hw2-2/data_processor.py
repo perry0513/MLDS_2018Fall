@@ -48,7 +48,7 @@ class DataProcessor():
 			for word in line:
 				idx = self.word2idx_dictionary.get(word, False)
 				encoded_line.append(idx if idx else self.UNK)
-			encoded_line = encoded_line + [self.PAD]*(self.max_seq_length-len(encoded_line))
+			encoded_line = encoded_line + [self.PAD]*(self.max_seq_length - len(encoded_line))
 			self.encoder_inputs.append(np.array(encoded_line))
 
 		for line in self.answer_list:
@@ -56,8 +56,8 @@ class DataProcessor():
 			for word in line:
 				idx = self.word2idx_dictionary.get(word, False)
 				encoded_line.append(idx if idx else self.UNK)
-			self.decoder_inputs.append(np.array([self.BOS] + encoded_line + [self.PAD]*(self.max_seq_length-len(encoded_line))))
-			self.decoder_targets.append(np.array(encoded_line + [self.EOS] + [self.PAD]*(self.max_seq_length-len(encoded_line))))
+			self.decoder_inputs.append(np.array([self.BOS] + encoded_line + [self.PAD]*(self.max_seq_length - len(encoded_line))))
+			self.decoder_targets.append(np.array(encoded_line + [self.PAD]*(self.max_seq_length - len(encoded_line))) + [self.EOS])
 
 
 	def build_dictionary(self):
