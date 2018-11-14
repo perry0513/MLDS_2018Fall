@@ -24,7 +24,7 @@ vocab_size = len(idx2word_dict)
 model = Seq2seq(rnn_size=rnn_size, num_layers=num_layers, batch_size=batch_size, vocab_size=vocab_size, mode=mode, 
 				max_encoder_steps=max_encoder_steps, max_decoder_steps=max_decoder_steps, embedding_size=embedding_size)
 
-# sampling probability for each epoch
+# TODO: sampling probability for each epoch
 sampling_prob = [ 0 for x in range(epochs) ]
 
 with tf.Session() as sess:
@@ -32,18 +32,13 @@ with tf.Session() as sess:
 
 	for epoch in range(epochs):
 		encoder_inputs, encoder_inputs_length, decoder_inputs, decoder_targets, decoder_targets_length = data_processor.get_batch(batch_size)
-
 		trainset = list(zip( encoder_inputs, encoder_inputs_length, decoder_inputs, decoder_targets, decoder_targets_length ))
 
 		for step, (batch_enc_inputs, batch_enc_inputs_length, batch_dec_inputs, batch_dec_targets, batch_dec_targets_len) in enumerate(trainset):
-			batch_enc_inputs = np.transpose(batch_enc_inputs, [1,0])
-			# for x in batch_dec_inputs:
-			# 	print(x.shape)
-			# print(type(batch_enc_inputs))
-			# print(type(batch_enc_inputs_length))
-			# print(batch_dec_inputs)
-			# print(type(batch_dec_targets))
-			# print(type(batch_dec_targets_len))
+			# trim batch_dec_targets to max time step
+			max_target_len = max(batch_dec_targets_len)
+			batch_dec_targets = [ line[:max_target_len] for line in batch_dec_targets ]
+
 			loss = model.train(sess=sess, encoder_inputs=batch_enc_inputs, encoder_inputs_length=batch_enc_inputs_length,
 							   decoder_inputs=batch_dec_inputs, decoder_targets=batch_dec_targets, 
 							   decoder_targets_length=batch_dec_targets_len, sampling_probability=sampling_prob[epoch])
