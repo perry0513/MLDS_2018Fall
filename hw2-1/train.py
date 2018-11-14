@@ -6,8 +6,13 @@ from tqdm import tqdm
 
 
 # Hyper-parameters
+<<<<<<< HEAD
 epochs = 5
 batch_size = 10 
+=======
+epochs = 40
+batch_size = 25
+>>>>>>> cafaec0cc52506058334166867561fa32f88d4ec
 
 mode = 'train'
 rnn_size   = 1024
@@ -15,7 +20,7 @@ num_layers = 1
 feat_size  = 4096
 max_encoder_steps = 80
 max_decoder_steps = 50
-embedding_size = 128
+embedding_size = 256
 
 data_processor = DataProcessor(mode)
 idx2word_dict = data_processor.get_dictionary()
