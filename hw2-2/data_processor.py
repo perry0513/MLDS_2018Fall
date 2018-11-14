@@ -22,7 +22,7 @@ class DataProcessor():
 		self.build_dictionary()
 
 	def get_dictionary(self):
-		return idx2word_dictionary
+		return self.idx2word_dictionary
 
 	def get_batch(self, batch_size=10):
 		total_data_num = len(self.question_list)
@@ -117,3 +117,4 @@ class DataProcessor():
 
 dp = DataProcessor()
 print (len(dp.idx2word_dictionary))
+print (dp.max_seq_length)
