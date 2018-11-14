@@ -72,9 +72,9 @@ class DataProcessor():
 				encoded_line.append(idx if idx else self.UNK)
 			self.decoder_inputs.append(np.array([self.BOS] + encoded_line + [self.PAD]*(self.max_seq_length - len(encoded_line))))
 			self.decoder_targets.append(np.array(encoded_line + [self.PAD]*(self.max_seq_length - len(encoded_line)) + [self.EOS] ))
-
-			if self.decoder_inputs[-1].shape[0] != 28 or self.decoder_targets[-1].shape[0] != 28:
-				print("======== ERROR ========",i)
+			
+			if self.decoder_inputs[-1].shape[0] != 29 or self.decoder_targets[-1].shape[0] != 29:
+				print("======== ERROR ========")
 				print(self.max_seq_length)
 				print(self.decoder_inputs[-1].shape[0])
 				print(self.decoder_targets[-1].shape[0])
@@ -118,6 +118,8 @@ class DataProcessor():
 					current_dictionary_idx += 1
 		for line in self.answer_list:
 			self.decoder_targets_length.append(len(line)+1)
+		self.max_seq_length += 1
+
 
 
 	def load_conversations(self):
