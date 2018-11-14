@@ -122,6 +122,7 @@ class DataProcessor():
 			self.decoder_targets_length.append(len(line)+1)
 
 
+
 	def load_conversations(self):
 		# load conversation for building dictionary
 		print ("Loading conversations . . .")
