@@ -76,8 +76,7 @@ class DataProcessor():
 				line = line.rstrip()
 				if line != "":
 					answer_list.append(line)
-
-		print('Total conversation number is %d.' %(len(self.question_list)) )
+		print ("Loading conversations finished. ")
 
 
 dp = DataProcessor()
