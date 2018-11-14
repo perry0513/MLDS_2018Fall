@@ -33,15 +33,16 @@ with tf.Session() as sess:
 	sess.run(tf.global_variables_initializer())
 
 	for epoch in range(epochs):
-		encoder_videos, decoder_inputs, decoder_targets, decoder_targets_length = data_processor.get_batch(batch_size, shuffle=True)
+		encoder_inputs, encoder_inputs_length, decoder_inputs, decoder_targets, 
+		decoder_targets_length = data_processor.get_batch(batch_size, shuffle=True)
 
-		trainset = list(zip( encoder_videos, decoder_inputs, decoder_targets, decoder_targets_length ))
+		trainset = list(zip( encoder_inputs, encoder_inputs_length, decoder_inputs, decoder_targets, decoder_targets_length ))
 
-		for step, (batch_videos, batch_dec_inputs, batch_dec_targets, batch_dec_targets_len) in enumerate(trainset):
-			batch_videos = np.transpose(batch_videos, [1,0,2])
-			loss = model.train(sess=sess, encoder_inputs=batch_videos, decoder_inputs=batch_dec_inputs,
-							   decoder_targets=batch_dec_targets, decoder_targets_length=batch_dec_targets_len, 
-							   sampling_probability=sampling_prob[step])
+		for step, (batch_enc_inputs, batch_enc_inputs_length, batch_dec_inputs, batch_dec_targets, batch_dec_targets_len) in enumerate(trainset):
+			batch_enc_inputs = np.transpose(batch_enc_inputs, [1,0,2])
+			loss = model.train(sess=sess, encoder_inputs=batch_enc_inputs, encoder_inputs_length=batch_enc_inputs_length,
+							   decoder_inputs=batch_dec_inputs, decoder_targets=batch_dec_targets, 
+							   decoder_targets_length=batch_dec_targets_len, sampling_probability=sampling_prob[step])
 			print ('Epoch: {:>2} | Step: {:>3} | Loss: {:.6f}'.format(epoch+1, step+1, loss))
 
 
