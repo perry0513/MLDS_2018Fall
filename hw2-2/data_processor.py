@@ -71,7 +71,7 @@ class DataProcessor():
 				idx = self.word2idx_dictionary.get(word, False)
 				encoded_line.append(idx if idx else self.UNK)
 			self.decoder_inputs.append(np.array([self.BOS] + encoded_line + [self.PAD]*(self.max_seq_length - len(encoded_line))))
-			self.decoder_targets.append(np.array(encoded_line + [self.PAD]*(self.max_seq_length - len(encoded_line)) + [self.EOS] ))
+			self.decoder_targets.append(np.array(encoded_line + [self.EOS] + [self.PAD]*(self.max_seq_length - len(encoded_line))  ))
 			
 			if self.decoder_inputs[-1].shape[0] != 29 or self.decoder_targets[-1].shape[0] != 29:
 				print("======== ERROR ========")
