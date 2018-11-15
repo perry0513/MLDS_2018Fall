@@ -21,6 +21,7 @@ idx2word_dict = data_processor.get_dictionary()
 vocab_size = len(idx2word_dict)
 
 model_dir = './model/'
+output_file = open('./MLDS_hw2_2_data/test_output.txt', 'w')
 
 with tf.Session() as sess:
 	model = Seq2seq(rnn_size=rnn_size, num_layers=num_layers, batch_size=batch_size, vocab_size=vocab_size, mode=mode, 
