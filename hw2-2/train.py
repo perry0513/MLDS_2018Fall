@@ -16,7 +16,7 @@ max_encoder_steps = 30
 max_decoder_steps = 30
 embedding_size = 256
 
-data_processor = DataProcessor()
+data_processor = DataProcessor(mode)
 idx2word_dict = data_processor.get_dictionary()
 vocab_size = len(idx2word_dict)
 
@@ -25,7 +25,10 @@ model = Seq2seq(rnn_size=rnn_size, num_layers=num_layers, batch_size=batch_size,
 				max_encoder_steps=max_encoder_steps, max_decoder_steps=max_decoder_steps, embedding_size=embedding_size)
 
 # TODO: sampling probability for each epoch
-sampling_prob = [ 0 for x in range(epochs) ]
+def func(x):
+	return 2 - 2 / (1 + np.exp(0.3*(x-epochs)))
+sampling_prob = func(np.arange(epochs))
+
 
 with tf.Session() as sess:
 	sess.run(tf.global_variables_initializer())

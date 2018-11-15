@@ -7,12 +7,14 @@ class DataProcessor():
 	EOS = 2
 	UNK = 3
 	question_data_path = './MLDS_hw2_2_data/sel_conversation/question.txt'
-	answer_data_path = './MLDS_hw2_2_data/sel_conversation/answer.txt'
+	answer_data_path   = './MLDS_hw2_2_data/sel_conversation/answer.txt'
+	testing_data_path  = './MLDS_hw2_2_data/test_input.txt'
 
-	def __init__(self, min_count=20):
+	def __init__(self, mode, min_count=20):
 		self.min_count = min_count
 		self.question_list = []
 		self.answer_list = []
+		self.test_list = []
 		self.encoder_inputs  = []
 		self.decoder_inputs  = []
 		self.decoder_targets = []
@@ -20,7 +22,8 @@ class DataProcessor():
 		self.decoder_targets_length = []
 		self.load_conversations()
 		self.build_dictionary()
-		self.encode_train_data()
+		if mode == 'train': self.encode_train_data()
+		else: self.encode_test_data()
 
 	def get_dictionary(self):
 		return self.idx2word_dictionary
@@ -43,7 +46,7 @@ class DataProcessor():
 
 
 	def encode_train_data(self):
-		print('Encoding data . . .')
+		print('Encoding training data . . .')
 		for line in self.question_list:
 			encoded_line = []
 			for word in line:
@@ -65,6 +68,31 @@ class DataProcessor():
 			# 	print(self.max_seq_length)
 			# 	print(self.decoder_inputs[-1].shape[0])
 			# 	print(self.decoder_targets[-1].shape[0])
+	
+
+	def get_batch_infer_data(self, batch_size=10):
+		num_of_batch = len(test_list) // batch_size
+		batched_encoder_inputs  = np.split(np.array(self.encoder_inputs[: num_of_batch*batch_size ]), num_of_batch)
+		return batched_encoder_inputs
+	
+	def encode_test_data(self):
+		print('Loading & encoding testing data . . .')
+		with open(self.testing_data_path, 'r', encoding='utf8') as f:
+			for line in f:
+				line = line.rstrip()
+				if line != "":
+					self.test_list.append(line.split(' '))
+
+		# padding & word2idx
+		for line in self.test_list:
+			encoded_line = []
+			for word in line:
+				idx = self.word2idx_dictionary.get(word, False)
+				encoded_line.append(idx if idx else self.UNK)
+			encoded_line = encoded_line + [self.PAD]*(self.max_seq_length - len(encoded_line))
+			self.encoder_inputs.append(np.array(encoded_line))
+
+
 
 	def build_dictionary(self):
 		print('Building dictionary . . .')
