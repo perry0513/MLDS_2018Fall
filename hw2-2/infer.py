@@ -34,8 +34,7 @@ with tf.Session() as sess:
 
 	encoder_inputs = data_processor.get_batch_infer_data(batch_size)
 
-	for step, batch_inputs in enumerate(tqdm(encoder_videos)):
-		batch_inputs = np.transpose(batch_inputs, [1,0])
+	for step, batch_inputs in enumerate(tqdm(encoder_inputs)):
 		predict, logits = model.infer(sess=sess, encoder_inputs=batch_inputs)
 		predict = np.transpose(predict, [0,2,1])
 		for batch in predict:
