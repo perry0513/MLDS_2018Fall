@@ -6,8 +6,8 @@ from tqdm import tqdm
 
 
 # Hyper-parameters
-epochs = 40
-batch_size = 25
+epochs = 1
+batch_size = 50
 
 mode = 'train'
 rnn_size   = 1024
