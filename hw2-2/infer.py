@@ -11,7 +11,6 @@ batch_size = 50
 mode = 'test'
 rnn_size   = 1024
 num_layers = 1
-feat_size  = 4096
 max_encoder_steps = 30
 max_decoder_steps = 30
 beam_size = 3
@@ -25,7 +24,7 @@ model_dir = './model/'
 
 with tf.Session() as sess:
 	model = Seq2seq(rnn_size=rnn_size, num_layers=num_layers, batch_size=batch_size, vocab_size=vocab_size, mode=mode, 
-					max_encoder_steps=max_encoder_steps, max_decoder_steps=max_decoder_steps, , beam_size=beam_sizeembedding_size=embedding_size)
+					max_encoder_steps=max_encoder_steps, max_decoder_steps=max_decoder_steps, beam_size=beam_size, embedding_size=embedding_size)
 
 	ckpt = tf.train.get_checkpoint_state(model_dir)
 	if ckpt and tf.train.checkpoint_exists(ckpt.model_checkpoint_path):
