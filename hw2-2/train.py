@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 
 # Hyper-parameters
-epochs = 1
+epochs = 10
 batch_size = 50
 
 mode = 'train'
