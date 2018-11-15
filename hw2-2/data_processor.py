@@ -72,7 +72,7 @@ class DataProcessor():
 	
 
 	def get_batch_infer_data(self, batch_size=10):
-		num_of_batch = len(test_list) // batch_size
+		num_of_batch = len(self.test_list) // batch_size
 		batched_encoder_inputs  = np.split(np.array(self.encoder_inputs[: num_of_batch*batch_size ]), num_of_batch)
 		return batched_encoder_inputs
 	
