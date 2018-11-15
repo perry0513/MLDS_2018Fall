@@ -21,7 +21,7 @@ idx2word_dict = data_processor.get_dictionary()
 vocab_size = len(idx2word_dict)
 
 model_dir = './model/'
-output_file = open('./MLDS_hw2_2_data/test_output.txt', 'w')
+output_file = open('./MLDS_hw2_2_data/test_output.txt', 'w', encoding='utf8')
 
 with tf.Session() as sess:
 	model = Seq2seq(rnn_size=rnn_size, num_layers=num_layers, batch_size=batch_size, vocab_size=vocab_size, mode=mode, 
@@ -35,7 +35,7 @@ with tf.Session() as sess:
 	encoder_inputs = data_processor.get_batch_infer_data(batch_size)
 
 	for step, batch_inputs in enumerate(tqdm(encoder_inputs)):
-		batch_inputs = np.transpose(batch_inputs, [1,0])
+		# batch_inputs = np.transpose(batch_inputs, [1,0])
 		predict, logits = model.infer(sess=sess, encoder_inputs=batch_inputs)
 		predict = np.transpose(predict, [0,2,1])
 		for batch in predict:
