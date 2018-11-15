@@ -29,7 +29,8 @@ class DataProcessor():
 		return self.idx2word_dictionary
 
 	def get_batch(self, batch_size=10):
-		total_data_num = len(self.question_list)
+		# total_data_num = len(self.question_list)
+		total_data_num = 1000
 		zipped = list(zip(self.encoder_inputs, self.encoder_inputs_length, self.decoder_inputs, self.decoder_targets, self.decoder_targets_length))
 		np.random.shuffle(zipped)
 		shuffled_encoder_inputs, shuffled_encoder_inputs_length, shuffled_decoder_inputs, \
@@ -71,7 +72,7 @@ class DataProcessor():
 	
 
 	def get_batch_infer_data(self, batch_size=10):
-		num_of_batch = len(test_list) // batch_size
+		num_of_batch = len(self.test_list) // batch_size
 		batched_encoder_inputs  = np.split(np.array(self.encoder_inputs[: num_of_batch*batch_size ]), num_of_batch)
 		return batched_encoder_inputs
 	
