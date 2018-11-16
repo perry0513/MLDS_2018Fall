@@ -43,15 +43,15 @@
 ### Format
     > hw2-2
         > MLDS_hw2_2_data/
-			> sel_conversation/
-			> evaluation/
+            > sel_conversation/
+            > evaluation/
         > model/
         > infer.sh
         > seq2seq.py
         > data_processor.py
         > train.py
         > infer.py
-		> get_wordvec.py
+	    > get_wordvec.py
 
 ### Links
 * data_link_1: https://drive.google.com/file/d/1mdeovBcIyUmxIhLrsUnzbhduW-Kuxjuh/view
