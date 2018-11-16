@@ -32,3 +32,7 @@
 * data_link: https://drive.google.com/file/d/1RevHMfXZ1zYjUm4fPU1CfFKAjyMJjdgJ/view
 * model_link: https://drive.google.com/open?id=1dOmvEu7yvfKPzldcSea-lIa7h9QS85HO
 * ppt_link: https://docs.google.com/presentation/d/1ipK5sOODxJSQ7bSwVRInjpo8LGRnMwuoLArbqdjFsd8/edit?usp=sharing
+
+## Hw2-2
+download and extract sel_conversation from hw2-2 ppt (2018) and put it in hw2-2/
+run get_wordvec.py and you'll have word2vec.model

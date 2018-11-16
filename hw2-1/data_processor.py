@@ -160,13 +160,13 @@ class DataProcessor():
 		for videos in (self.training_data_encoded_by_idx if self.mode == 'train' else self.testing_data_encoded_by_idx):
 			self.decoder_targets.append( np.array([ np.array(captions + [self.EOS] + [self.PAD]*(self.max_caption_length-len(captions))) for captions in videos ] ) )
 
-# # TEST
+# TEST
 # dataprocessor = DataProcessor('test')
 # print(dataprocessor.get_videos().shape)
 # print(dataprocessor.get_dictionary())
 # print(dataprocessor.get_decoder_inputs().shape)
 # print(dataprocessor.get_decoder_targets().shape)
-# a, b, c, d = dataprocessor.get_shuffle_and_batch(5)
+# a, b, c, d = dataprocessor.get_batch(5, True)
 # print(np.array(a).shape)
 # print(len(b))
 # print(len(c))
