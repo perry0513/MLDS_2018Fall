@@ -26,7 +26,7 @@ model = Seq2seq(rnn_size=rnn_size, num_layers=num_layers, batch_size=batch_size,
 
 # TODO: sampling probability for each epoch
 def func(x):
-	return 2 - 2 / (1 + np.exp(0.3*(x-epochs)))
+	return 2 - 2 / (1 + np.exp(0.3*(x-2*epochs)))
 sampling_prob = func(np.arange(epochs))
 
 
