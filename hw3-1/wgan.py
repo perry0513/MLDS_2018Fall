@@ -8,8 +8,8 @@ class WGAN():
 	def __init__(self, noise_dim):
 		self.noise_dim = noise_dim
 		self.clip_w = 0.01
-		self.display_step = 10
-		# plt.switch_backend('agg')
+		self.display_step = 5
+		plt.switch_backend('agg')
 		self.build_model()
 
 	def discriminator(self, inputs, reuse=False):
@@ -75,10 +75,10 @@ class WGAN():
 					  .format(epoch+1, epochs, w_distance, g_loss) )
 
 				if (epoch+1) % self.display_step == 0:
-					samples = [ sess.run(self.fake_img, feed_dict={ self.g_inputs:np.random.normal(0, 1, (5*5, self.noise_dim)) }) ]
+					samples = sess.run(self.fake_img, feed_dict={ self.g_inputs:np.random.normal(0, 1, (5*5, self.noise_dim)) })
 					fig = self.visualize_result(samples)
 					plt.savefig('./pics/{}.png'.format(epoch+1), bbox_inches='tight')
-# 					plt.close(fig)
+					plt.close(fig)
 		
 	def visualize_result(self, samples):
 		fig = plt.figure(figsize=(5,5))
@@ -92,7 +92,7 @@ class WGAN():
 			ax.set_yticklabels([])
 			ax.set_aspect('equal')
 
-# 			plt.imshow(sample.reshape(64, 64, 3), cmap='Greys_r')
+			plt.imshow(sample, cmap='Greys_r')
 
 		return fig
 

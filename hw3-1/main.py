@@ -9,6 +9,6 @@ g_iter = 1
 d_iter = 5
 
 model = WGAN(noise_dim)
-model.train(epochs, batch_size, g_iter, d_iter, 2000)
+model.train(epochs, batch_size, g_iter, d_iter)
 
 

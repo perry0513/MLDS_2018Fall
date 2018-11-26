@@ -27,8 +27,8 @@ class DataProcessor():
 			# save as .npy file
 			np.save(self.npy_path, self.image_list)
 
-		print (self.image_list.shape)
-		print (self.image_list[0])
+		# print (self.image_list.shape)
+		# print (self.image_list[0])
 
 
 	def get_batch(self, batch_size, d_iter):
@@ -40,6 +40,6 @@ class DataProcessor():
 
 		return batched_img[:d_iter] # batched_label
 
-dp = DataProcessor()
+# dp = DataProcessor()
 # a = dp.get_batch(100)
 # print(a[0].shape)
