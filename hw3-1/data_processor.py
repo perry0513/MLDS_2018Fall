@@ -22,14 +22,14 @@ class DataProcessor():
 		print (self.image_list[0])
 
 
-	def get_batch(self, batch_size):
+	def get_batch(self, batch_size, d_iter):
 		np.random.shuffle(self.image_list)
 		batch_num = self.image_num // batch_size
 
 		batched_img = np.split(self.image_list[: batch_size*batch_num ], batch_num)
 		# batched_label = np.array([ np.ones(batch_size) for i in range(batch_num) ])
 
-		return batched_img # batched_label
+		return batched_img[:d_iter] # batched_label
 
 # dp = DataProcessor()
 # dp.load_data()
