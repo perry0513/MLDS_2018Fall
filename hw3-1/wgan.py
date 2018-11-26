@@ -1,13 +1,15 @@
 import numpy as np
 import tensorflow as tf
 from matplotlib import pyplot as plt
+import matplotlib.gridspec as gridspec
 import data_processor
 
 class WGAN():
 	def __init__(self, noise_dim):
 		self.noise_dim = noise_dim
 		self.clip_w = 0.01
-		self.display_step = 1000
+		self.display_step = 10
+		# plt.switch_backend('agg')
 		self.build_model()
 
 	def discriminator(self, inputs, reuse=False):
@@ -44,7 +46,7 @@ class WGAN():
 		d_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'discriminator')
 		g_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'generator')
 
-		self.d_optim = tf.train.RMSPropOptimizer(learning_rate=0.0005).minimize( self.w_distance, var_list=d_vars )
+		self.d_optim = tf.train.RMSPropOptimizer(learning_rate=0.0005).minimize( -1*self.w_distance, var_list=d_vars )
 		self.g_optim = tf.train.RMSPropOptimizer(learning_rate=0.0005).minimize( self.g_loss, var_list=g_vars )
 
 		self.clip_D = [ var.assign(tf.clip_by_value(var, -self.clip_w, self.clip_w)) for var in d_vars ]
@@ -75,8 +77,8 @@ class WGAN():
 				if (epoch+1) % self.display_step == 0:
 					samples = [ sess.run(self.fake_img, feed_dict={ self.g_inputs:np.random.normal(0, 1, (5*5, self.noise_dim)) }) ]
 					fig = self.visualize_result(samples)
-					plt.savefig('{}.png'.format(epoch+1), bbox_inches='tight')
-					plt.close(fig)
+					plt.savefig('./pics/{}.png'.format(epoch+1), bbox_inches='tight')
+# 					plt.close(fig)
 		
 	def visualize_result(self, samples):
 		fig = plt.figure(figsize=(5,5))
@@ -90,7 +92,7 @@ class WGAN():
 			ax.set_yticklabels([])
 			ax.set_aspect('equal')
 
-			plt.imshow(sample.reshape(64, 64, 3), cmap='Greys_r')
+# 			plt.imshow(sample.reshape(64, 64, 3), cmap='Greys_r')
 
 		return fig
 

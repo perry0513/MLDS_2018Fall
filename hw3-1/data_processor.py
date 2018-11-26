@@ -9,6 +9,7 @@ class DataProcessor():
 		self.image_list = []
 		self.load_data()
 
+
 	def load_data(self):
 		print ("Loading image data . . .")
 		image_list = []
@@ -18,8 +19,6 @@ class DataProcessor():
 
 		# normalize
 		self.image_list = image_list / 256
-		print (self.image_list.shape)
-		print (self.image_list[0])
 
 
 	def get_batch(self, batch_size, d_iter):
