@@ -1,6 +1,8 @@
 import numpy as np
 import tensorflow as tf
+from gan import GAN
 from wgan import WGAN
+from dcgan import DCGAN
 import os
 import argparse
 
@@ -14,8 +16,8 @@ curr_epoch = getattr(args, 'curr_epoch')
 epochs = getattr(args, 'epoch')
 
 batch_size = 128
-noise_dim = 128
-g_iter = 1
+noise_dim = 100
+g_iter = 2
 d_iter = 1
 
 # change curr_epoch, 0 for untrained
@@ -23,7 +25,7 @@ d_iter = 1
 restore_model_dir = './model/model_'+str(curr_epoch)+'/'
 print(restore_model_dir)
 
-model = WGAN(noise_dim)
+model = DCGAN(noise_dim)
 
 if mode == 'train':
 	model.train(curr_epoch, epochs, batch_size, g_iter, d_iter, restore_model_dir)
