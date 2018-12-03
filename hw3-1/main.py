@@ -16,7 +16,7 @@ curr_epoch = getattr(args, 'curr_epoch')
 epochs = getattr(args, 'epoch')
 
 batch_size = 128
-noise_dim = 100
+noise_dim = 128
 g_iter = 2
 d_iter = 1
 

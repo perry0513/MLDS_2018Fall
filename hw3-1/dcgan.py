@@ -13,7 +13,7 @@ class DCGAN():
 			os.makedirs(self.pic_path)
 		self.noise_dim = noise_dim
 		self.alpha = 0.2
-		self.learning_rate = 0.0002
+		self.learning_rate = 0.0005
 		self.beta1 = 0.5
 		self.display_step = 1
 		plt.switch_backend('agg')
@@ -26,7 +26,7 @@ class DCGAN():
 			conv1 = tf.nn.leaky_relu((tf.layers.conv2d(inputs=inputs, filters=64, kernel_size=(5,5), strides=(2,2), kernel_initializer=tf.truncated_normal_initializer(stddev=0.02))), alpha=self.alpha)
 			conv2 = tf.nn.leaky_relu((tf.layers.conv2d(inputs=conv1, filters=128, kernel_size=(5,5), strides=(2,2), kernel_initializer=tf.truncated_normal_initializer(stddev=0.02))), alpha=self.alpha)
 			conv3 = tf.nn.leaky_relu((tf.layers.conv2d(inputs=conv2, filters=256, kernel_size=(5,5), strides=(2,2), kernel_initializer=tf.truncated_normal_initializer(stddev=0.02))), alpha=self.alpha)
-# 			conv4 = tf.nn.leaky_relu((tf.layers.conv2d(inputs=conv3, filters=512, kernel_size=(5,5), strides=(2,2), kernel_initializer=tf.truncated_normal_initializer(stddev=0.02))), alpha=self.alpha)
+			conv4 = tf.nn.leaky_relu((tf.layers.conv2d(inputs=conv3, filters=512, kernel_size=(5,5), strides=(2,2), kernel_initializer=tf.truncated_normal_initializer(stddev=0.02))), alpha=self.alpha)
 			flatten = tf.layers.flatten(conv3)
 			# output has no activation function
 			output = tf.layers.dense(flatten,1)
@@ -34,23 +34,23 @@ class DCGAN():
 
 	def generator(self, inputs, reuse=False, is_training=True):
 		# inputs: (batch_size, noise_dim)
-		with tf.variable_scope('generator', reuse=reuse):
-			dense1 = tf.layers.dense(inputs, 1024*4*4, kernel_initializer=tf.truncated_normal_initializer(stddev=0.02))
-			reshape = tf.reshape(dense1, shape=[-1, 4, 4, 1024])
-			conv_trans1 = tf.nn.relu(tf.layers.conv2d_transpose(inputs=reshape, filters=512, kernel_size=(5,5), strides=(2,2), padding='same', kernel_initializer=tf.truncated_normal_initializer(stddev=0.02)))
-			conv_trans2 = tf.nn.relu((tf.layers.conv2d_transpose(inputs=conv_trans1, filters=256, kernel_size=(5,5), strides=(2,2), padding='same', kernel_initializer=tf.truncated_normal_initializer(stddev=0.02))))
-			conv_trans3 = tf.nn.relu((tf.layers.conv2d_transpose(inputs=conv_trans2, filters=128, kernel_size=(5,5), strides=(2,2), padding='same', kernel_initializer=tf.truncated_normal_initializer(stddev=0.02))))
-			conv_trans4 = tf.nn.relu((tf.layers.conv2d_transpose(inputs=conv_trans3, filters=3, kernel_size=(5,5), strides=(2,2), padding='same', kernel_initializer=tf.truncated_normal_initializer(stddev=0.02))))
-			output = tf.nn.tanh(conv_trans4)
-		return output
-# 		with tf.variable_scope('generator', reuse=reuse)
-# 			dense1 = tf.nn.leaky_relu(tf.layers.dense(inputs, 128*16*16))
-# 			reshape = tf.reshape(dense1, shape=[-1, 16, 16, 128])
-# 			conv_trans1 = tf.nn.leaky_relu(tf.layers.conv2d_transpose(inputs=reshape, filters=128, kernel_size=(4,4), strides=(2,2), padding='same'), alpha=self.alpha)
-# 			conv_trans2 = tf.nn.leaky_relu(tf.layers.conv2d_transpose(inputs=conv_trans1, filters=64, kernel_size=(4,4), strides=(2,2), padding='same'), alpha=self.alpha)
-# 			conv3 = tf.nn.leaky_relu(tf.layers.conv2d(inputs=conv_trans2, filters=3, kernel_size=(4,4), strides=(1,1), padding='same'), alpha=self.alpha)
-# 			output = tf.nn.tanh(conv3)
+# 		with tf.variable_scope('generator', reuse=reuse):
+# 			dense1 = tf.layers.dense(inputs, 1024*4*4, kernel_initializer=tf.truncated_normal_initializer(stddev=0.02))
+# 			reshape = tf.reshape(dense1, shape=[-1, 4, 4, 1024])
+# 			conv_trans1 = tf.nn.leaky_relu(tf.layers.conv2d_transpose(inputs=reshape, filters=512, kernel_size=(5,5), strides=(2,2), padding='same', kernel_initializer=tf.truncated_normal_initializer(stddev=0.02)), alpha=self.alpha)
+# 			conv_trans2 = tf.nn.leaky_relu((tf.layers.conv2d_transpose(inputs=conv_trans1, filters=256, kernel_size=(5,5), strides=(2,2), padding='same', kernel_initializer=tf.truncated_normal_initializer(stddev=0.02))), alpha=self.alpha)
+# 			conv_trans3 = tf.nn.leaky_relu((tf.layers.conv2d_transpose(inputs=conv_trans2, filters=128, kernel_size=(5,5), strides=(2,2), padding='same', kernel_initializer=tf.truncated_normal_initializer(stddev=0.02))), alpha=self.alpha)
+# 			conv_trans4 = tf.nn.leaky_relu((tf.layers.conv2d_transpose(inputs=conv_trans3, filters=3, kernel_size=(5,5), strides=(2,2), padding='same', kernel_initializer=tf.truncated_normal_initializer(stddev=0.02))), alpha=self.alpha)
+# 			output = tf.nn.tanh(conv_trans4)
 # 		return output
+		with tf.variable_scope('generator', reuse=reuse):
+			dense1 = tf.nn.leaky_relu(tf.layers.dense(inputs, 128*16*16))
+			reshape = tf.reshape(dense1, shape=[-1, 16, 16, 128])
+			conv_trans1 = tf.nn.leaky_relu(tf.layers.conv2d_transpose(inputs=reshape, filters=128, kernel_size=(4,4), strides=(2,2), padding='same'), alpha=self.alpha)
+			conv_trans2 = tf.nn.leaky_relu(tf.layers.conv2d_transpose(inputs=conv_trans1, filters=64, kernel_size=(4,4), strides=(2,2), padding='same'), alpha=self.alpha)
+			conv3 = tf.nn.leaky_relu(tf.layers.conv2d(inputs=conv_trans2, filters=3, kernel_size=(4,4), strides=(1,1), padding='same'), alpha=self.alpha)
+			output = tf.nn.tanh(conv3)
+		return output
 
 	def build_model(self):
 		self.g_inputs = tf.placeholder(shape=(None, self.noise_dim), dtype=tf.float32, name='generator_inputs')
@@ -73,9 +73,13 @@ class DCGAN():
 		self.g_optim = tf.train.AdamOptimizer(learning_rate=self.learning_rate, beta1=self.beta1).minimize( self.g_loss, var_list=g_vars )
 
 
+	def get_noise(self, batch_size):
+# 		return np.random.normal(0, 1, (batch_size, self.noise_dim))
+		return np.random.uniform(-0.5, 0.5, (batch_size, self.noise_dim))
+		
 	def train(self, start_epoch, epochs, batch_size, g_iter, d_iter, model_dir):
 		dp = data_processor.DataProcessor()
-		sample_noise = np.random.normal(0, 1, (5*5, self.noise_dim))
+		sample_noise = self.get_noise(5*5)
 
 		with tf.Session() as sess:
 			sess.run(tf.global_variables_initializer())
@@ -92,15 +96,15 @@ class DCGAN():
 				batched_img = dp.get_batch(batch_size, d_iter)
 				
 				for b, img in enumerate(batched_img):
+					z = self.get_noise(batch_size)
 					for it in range(d_iter):
-						z = np.random.normal(0, 1, (batch_size, self.noise_dim))
 						_, d_loss, d_real, d_fake = sess.run([ self.d_optim, self.d_loss, self.d_real_loss, self.d_fake_loss ], 
 													  feed_dict={ self.g_inputs:z, self.d_inputs:img })
 # 						print('Epoch [{:>2}/{:>2}] | Batch [{:>3}/{:>3}] | Iter [{:>2}/{:>2}] | W_dist: {:.6f}'
 # 							  .format(epoch+1, end_epoch, b+1, len(batched_img), it+1, d_iter, w_distance), end='\r')
 					
+					z = self.get_noise(batch_size)
 					for it in range(g_iter):
-						z = np.random.normal(0, 1, (batch_size, self.noise_dim))
 						_, g_loss = sess.run([ self.g_optim, self.g_loss ], feed_dict={ self.g_inputs:z })
 						
 # 						print('Epoch [{:>2}/{:>2}] | Batch [{:>3}/{:>3}] | Iter [{:>2}/{:>2}] | G_loss: {:.6f}'
@@ -120,7 +124,7 @@ class DCGAN():
 			self.saver.save(sess, './model/model_'+str(end_epoch)+'/model_'+str(end_epoch))
 			
 	def infer(self, model_dir):
-		sample_noise = np.random.normal(0, 1, (5*5, self.noise_dim))
+		sample_noise = self.get_noise(5*5)
 		with tf.Session() as sess:
 			sess.run(tf.global_variables_initializer())
 			
