@@ -21,7 +21,6 @@ class DataProcessor():
 		else:
 			image_list = []
 			for i in tqdm(range(self.image_num)):
-# 				print('Loading ', i+1, ' . . .')
 				image_bgr = cv2.resize(cv2.imread(self.image_path+str(i)+".jpg"), (64, 64))
 				image_rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
 				image_list.append(image_rgb)
@@ -32,13 +31,6 @@ class DataProcessor():
 			self.image_list = image_list / 128 - 1
 			# save as .npy file
 			np.save(self.npy_path, self.image_list)
-
-		# print (self.image_list.shape)
-		# print (self.image_list[0])
-		# cv2.imshow('img', self.image_list[1])
-		# cv2.waitKey()
-		# plt.imshow(self.image_list[1])
-		# plt.show()
 
 
 	def get_batch(self, batch_size, batch_needed):

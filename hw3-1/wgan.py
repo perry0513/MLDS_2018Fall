@@ -16,7 +16,7 @@ class WGAN():
 		self.alpha = 0.1
 		self.learning_rate = 0.0005
 		self.display_step = 1
-		plt.switch_backend('agg')
+		# plt.switch_backend('agg')
 		self.build_model()
 		self.saver = tf.train.Saver(max_to_keep=50)
 
