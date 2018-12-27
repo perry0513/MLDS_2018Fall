@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
-from gan import GAN
-from wgan import WGAN
+# from gan import GAN
+# from wgan import WGAN
 from dcgan import DCGAN
 import os
 import argparse
@@ -19,9 +19,9 @@ restore_model_dir = getattr(args, 'model_dir')
 save_model_name = getattr(args, 'save_model')
 epochs = getattr(args, 'epoch')
 
-batch_size = 10
+batch_size = 32
 noise_dim = 128
-g_iter = 5
+g_iter = 3
 d_iter = 1
 
 # change curr_epoch, 0 for untrained
