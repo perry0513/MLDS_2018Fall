@@ -1,5 +1,5 @@
-# MLDS_hw3-1
-## Hw3-1
+# MLDS_hw3-2
+## Hw3-2
 ### Prerequisites
     $ pip3 install tensorflow
     $ pip3 install numpy
@@ -8,12 +8,10 @@
     $ pip3 install tqdm
 
 ### Format
-    > hw3-1
+    > hw3-2
         > AnimeDataset/
         > model/
         > dcgan.py
-        > wgan.py
-        > gan.py
         > data_processor.py
         > main.py
 
@@ -25,5 +23,5 @@
 
 ### Links
 * data_link: https://drive.google.com/file/d/1tpW7ZVNosXsIAWu8-f5EpwtF3ls3pb79/view
-* model_link: https://drive.google.com/open?id=1XghiPSW7T0H0AM02393hjRlB2WyOh4rI
-* ppt_link: https://drive.google.com/open?id=1wWDJEfLbXRzEOt-f3hLmJypOR6nqsZEjU55EbB5SmDY
+* model_link: https://drive.google.com/open?id=1ZGE2RUnOWi2BpiYlLnu0GQGp4qRPeAi3
+* ppt_link: https://drive.google.com/open?id=1kWj7iZLbBphU3Wb2t58KbMbjf8JzgKzbQ_MeEycUaAw
