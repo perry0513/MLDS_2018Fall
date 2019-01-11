@@ -100,7 +100,7 @@ class Agent_PG(Agent):
 
             num_rounds = 1
             num_actions = 1
-            num_wins = 0
+            num_win = 0
             num_lose = 0
 
             while not done:
