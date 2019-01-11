@@ -86,6 +86,8 @@ class Agent_PG(Agent):
         Implement your training algorithm here
         """
         self.init_game_setting()
+
+        self.sess.run(tf.global_variables_initializer())
         
         for num_episode in range(self.episodes):
             done = False
@@ -95,10 +97,6 @@ class Agent_PG(Agent):
             action = self.env.action_space.sample()
             observation, reward, done, info = self.env.step(action)
             state = prepro(observation)
-
-            #debug code
-            print ("observation shape:", observation.shape)
-            print ("state shape:", state.shape)
 
             num_rounds = 1
             num_actions = 1
