@@ -51,3 +51,7 @@ class PPO():
 					activation=tf.nn.softmax,
 					kernel_initializer=tf.keras.initializers.glorot_uniform(seed=seed),
 					bias_initializer=tf.zeros_initializer())
+		self.act_stochastic = tf.multinomial(tf.log(self.act_probs), num_samples=1)
+		self.act_stochastic = tf.reshape(self.act_stochastic, shape=[-1])
+
+		self.act_deterministic = tf.argmax(self.act_probs, axis=1)
