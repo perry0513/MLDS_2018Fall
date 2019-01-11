@@ -32,22 +32,44 @@ class Agent_PG(Agent):
         if args.test_pg:
             #you can load your model here
             print('loading trained model')
+        
+        # Load Arguments
+        self.batch_size = args.batch_size
+        self.learning_rate = args.learning_rate
+        self.episodes = args.episodes
+        self.discount_factor = args.discount_factor
+        self.render = args.render
+        
+        # 
+        self.action_size = 2 # up/down
+        self.states = []
+        self.actions = []
+        self.rewards = []
+        self.probs = []
+        self.v_preds = []
+        self.recent_avg_rewards = []
 
-        ##################
-        # YOUR CODE HERE #
-        ##################
+        self.env = env
+        self.env.seed(2000)
+
+        self.theta = PPOModel(self.action_size)
+        self.theta_k = PPOModel(self.action_size)
+
+        self.PPO = PPOTrain(self.theta, self.theta_k, gamma=self.discount_factor)
+
 
 
     def init_game_setting(self):
         """
 
-        Testing function will call this function at the begining of new game
+        Testing functi:qon will call this function at the begining of new game
         Put anything you want to initialize if necessary
 
         """
-        ##################
-        # YOUR CODE HERE #
-        ##################
+        self.recent_episode_num = 30
+        self.recent_rewards = []
+        self.recent_avg_reward = None
+        self.best_avg_reward = -30.0
         pass
 
 
@@ -55,9 +77,61 @@ class Agent_PG(Agent):
         """
         Implement your training algorithm here
         """
-        ##################
-        # YOUR CODE HERE #
-        ##################
+        self.init_game_setting()
+        
+        for num_episode in range(self.episodes):
+            done = False
+            sum_reward_per_episode = 0
+
+            last_state = prepro(self.env.reset())
+            action = self.env.action_space.sample()
+            observation, reward, done, info = self.env.step(action)
+            state = prepro(observation)
+
+            num_rounds = 1
+            num_actions = 1
+            num_wins = 0
+            num_lose = 0
+
+            while not done:
+                if self.render:
+                    self.env.render()
+
+                delta_state = state - last_state
+                last_state = state
+
+                action, v_pred = self.theta.act(states=np.expand_dims(delta_state, axis=0), stochastic=True)
+                
+                observation, reward, done, info = self.env.step(action+2) # 2 for up and 3 for down
+
+                self.states.append(delta_state)
+                self.actions.append(action)
+                self.v_preds.append(v_pred)
+                self.rewards.append(reward)
+
+                state = prepro(observation)
+                sum_reward_per_episode += reward
+                num_actions += 1
+
+                if reward == -1:
+                    num_lose += 1
+                if reward == +1:
+                    num_win += 1
+                if reward != 0:
+                    print ('Round [{:2d}] {:2d} : {:2d}'.format(num_rounds, num_lose, num_win), end='\r')
+                    num_rounds += 1
+            
+            v_preds_next = self.v_preds[1:] + [0] # next state of terminate state has 0 state value
+
+            recent_rewards.append(sum_reward_episode)
+            if len(recent_rewards) > recent_episode_num:
+                recent_rewards.pop(0)
+
+            recent_avg_reward = sum(recent_rewards) / len(recent_rewards)
+            self.recent_avg_rewards.append(recent_avg_reward)
+
+            print ('Episode {:d} | Actions {:4d} | Reward {:2.3f} | Avg. reward {:2.6f}'.format(num_episode, num_actions, sum_reward_episode, recent_avg_reward))
+
         pass
 
 
