@@ -50,6 +50,9 @@ class PPOModel():
 						activation=tf.nn.softmax,
 						kernel_initializer=tf.keras.initializers.glorot_uniform(seed=self.seed),
 						bias_initializer=tf.zeros_initializer())
+			
+			self.scope = tf.get_variable_scope().name
+			
 			self.act_stochastic = tf.multinomial(tf.log(self.act_probs), num_samples=1)
 			self.act_stochastic = tf.reshape(self.act_stochastic, shape=[-1])
 
@@ -63,3 +66,6 @@ class PPOModel():
 	
 	def get_action_prob(self, states):
 		return tf.get_default_session().run(self.act_probs, feed_dict={self.states: states})
+
+	def get_trainable_variables(self):
+		return tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, self.scope)

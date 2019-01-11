@@ -111,7 +111,8 @@ class Agent_PG(Agent):
                 last_state = state
 
                 action, v_pred = self.theta.act(states=np.expand_dims(delta_state, axis=0), stochastic=True)
-                
+                action = np.asscalar(action)
+
                 observation, reward, done, info = self.env.step(action+2) # 2 for up and 3 for down
 
                 self.states.append(delta_state)
