@@ -37,6 +37,7 @@ class Agent_PG(Agent):
         self.batch_size = args.batch_size
         self.learning_rate = args.learning_rate
         self.episodes = args.episodes
+        self.save_history_period = args.save_history_period
         self.discount_factor = args.discount_factor
         self.render = args.render
         
@@ -131,8 +132,27 @@ class Agent_PG(Agent):
             self.recent_avg_rewards.append(recent_avg_reward)
 
             print ('Episode {:d} | Actions {:4d} | Reward {:2.3f} | Avg. reward {:2.6f}'.format(num_episode, num_actions, sum_reward_episode, recent_avg_reward))
+            
+            if recent_avg_reward > best_avg_reward:
+                best_avg_reward = recent_avg_reward
+                # TODO: save checkpoint
+            
+            # TODO: train
+            gen_adv_ests = self.PPO.getGAEs(rewards=self.rewards, v_preds=self.v_preds, v_preds_next=self.v_preds_next)
 
-        pass
+            states = np.array(self.states).astype(dtype=np.float32)
+            actions = np.array(self.actions).astype(dtype=np.int32)
+            rewards = np.array(self.rewards).astype(dtype=np.float32)
+            v_preds_next = np.array(v_preds_next).astype(dtype=np.float32)
+            gen_adv_ests = np.array(gen_adv_ests).astype(dtype=np.float32)
+            gen_adv_ests = (gen_adv_ests - gen_adv_ests.mean()) / gen_adv_ests.std()
+
+            self.PPO.assign_policy_parameters()
+
+            self.PPO.train(states=states, actions=actions, gen_adv_ests=gen_adv_ests, rewards=rewards, v_preds_next=v_preds_next)
+
+        if num_episode % self.save_history_period == 0:
+            np.save('recent_avg_reward.py', np.array(self.recent_avg_reward))
 
 
     def make_action(self, observation, test=True):
