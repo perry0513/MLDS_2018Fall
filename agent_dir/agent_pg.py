@@ -112,6 +112,7 @@ class Agent_PG(Agent):
 
                 action, v_pred = self.theta.act(states=np.expand_dims(delta_state, axis=0), stochastic=True)
                 action = np.asscalar(action)
+                v_pred = np.asscalar(v_pred)
 
                 observation, reward, done, info = self.env.step(action+2) # 2 for up and 3 for down
 
@@ -134,32 +135,32 @@ class Agent_PG(Agent):
             
             v_preds_next = self.v_preds[1:] + [0] # next state of terminate state has 0 state value
 
-            recent_rewards.append(sum_reward_episode)
-            if len(recent_rewards) > recent_episode_num:
-                recent_rewards.pop(0)
+            self.recent_rewards.append(sum_reward_per_episode)
+            if len(self.recent_rewards) > self.recent_episode_num:
+                self.recent_rewards.pop(0)
 
-            recent_avg_reward = sum(recent_rewards) / len(recent_rewards)
+            recent_avg_reward = sum(self.recent_rewards) / len(self.recent_rewards)
             self.recent_avg_rewards.append(recent_avg_reward)
 
-            print ('Episode {:d} | Actions {:4d} | Reward {:2.3f} | Avg. reward {:2.6f}'.format(num_episode, num_actions, sum_reward_episode, recent_avg_reward))
+            print ('Episode {:d} | Actions {:4d} | Reward {:2.3f} | Avg. reward {:2.6f}'.format(num_episode, num_actions, sum_reward_per_episode, recent_avg_reward))
             
-            if recent_avg_reward > best_avg_reward:
-                best_avg_reward = recent_avg_reward
+            if recent_avg_reward > self.best_avg_reward:
+                self.best_avg_reward = recent_avg_reward
                 # TODO: save checkpoint
             
             # TODO: train
-            gen_adv_ests = self.PPO.getGAEs(rewards=self.rewards, v_preds=self.v_preds, v_preds_next=self.v_preds_next)
+            gaes = self.PPO.get_gaes(rewards=self.rewards, v_preds=self.v_preds, v_preds_next=v_preds_next)
 
             states = np.array(self.states).astype(dtype=np.float32)
             actions = np.array(self.actions).astype(dtype=np.int32)
             rewards = np.array(self.rewards).astype(dtype=np.float32)
             v_preds_next = np.array(v_preds_next).astype(dtype=np.float32)
-            gen_adv_ests = np.array(gen_adv_ests).astype(dtype=np.float32)
-            gen_adv_ests = (gen_adv_ests - gen_adv_ests.mean()) / gen_adv_ests.std()
+            gaes = np.array(gaes).astype(dtype=np.float32)
+            gaes = (gaes - gaes.mean()) / gaes.std()
 
             self.PPO.assign_policy_parameters()
 
-            self.PPO.train(states=states, actions=actions, gen_adv_ests=gen_adv_ests, rewards=rewards, v_preds_next=v_preds_next)
+            self.PPO.train(states=states, actions=actions, gaes=gaes, rewards=rewards, v_preds_next=v_preds_next)
 
         if num_episode % self.save_history_period == 0:
             np.save('recent_avg_reward.py', np.array(self.recent_avg_reward))
