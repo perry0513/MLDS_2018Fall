@@ -19,7 +19,8 @@ def prepro(o,image_size=[80,80]):
         Grayscale image, shape: (80, 80, 1)
     
     """
-    y = o.astype(np.uint8)
+    y = 0.2126 * o[:, :, 0] + 0.7152 * o[:, :, 1] + 0.0722 * o[:, :, 2]
+    y = y.astype(np.uint8)
     resized = scipy.misc.imresize(y, image_size)
     return np.expand_dims(resized.astype(np.float32),axis=2)
 
@@ -95,6 +96,10 @@ class Agent_PG(Agent):
             observation, reward, done, info = self.env.step(action)
             state = prepro(observation)
 
+            #debug code
+            print ("observation shape:", observation.shape)
+            print ("state shape:", state.shape)
+
             num_rounds = 1
             num_actions = 1
             num_wins = 0
@@ -106,9 +111,6 @@ class Agent_PG(Agent):
 
                 delta_state = state - last_state
                 last_state = state
-                
-                #debug
-                print (delta_state.shape)
 
                 action, v_pred = self.theta.act(states=np.expand_dims(delta_state, axis=0), stochastic=True)
                 
