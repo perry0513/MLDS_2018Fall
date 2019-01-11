@@ -1,6 +1,6 @@
 import tensorflow as tf
 
-class PPOTTrain:
+class PPOTrain:
 	def __init__(self, Policy, Old_Policy, gamma, clip_value=0.2, c_1=1, c_2=0.01):
 		self.Policy = Policy
 		self.Old_Policy = Old_Policy

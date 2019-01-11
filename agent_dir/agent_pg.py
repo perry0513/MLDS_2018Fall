@@ -2,7 +2,9 @@ from agent_dir.agent import Agent
 import scipy
 import numpy as np
 
-import 
+import tensorflow as tf
+from agent_dir.PPOTrain import PPOTrain
+from agent_dir.PPOModel import PPOModel
 
 def prepro(o,image_size=[80,80]):
     """
@@ -31,6 +33,8 @@ class Agent_PG(Agent):
 
         super(Agent_PG,self).__init__(env)
 
+        self.sess = tf.InteractiveSession()
+
         if args.test_pg:
             #you can load your model here
             print('loading trained model')
@@ -55,8 +59,8 @@ class Agent_PG(Agent):
         self.env = env
         self.env.seed(2000)
 
-        self.theta = PPOModel(self.action_size)
-        self.theta_k = PPOModel(self.action_size)
+        self.theta = PPOModel('policy', self.action_size)
+        self.theta_k = PPOModel('old_policy', self.action_size)
 
         self.PPO = PPOTrain(self.theta, self.theta_k, gamma=self.discount_factor)
 
@@ -102,6 +106,9 @@ class Agent_PG(Agent):
 
                 delta_state = state - last_state
                 last_state = state
+                
+                #debug
+                print (delta_state.shape)
 
                 action, v_pred = self.theta.act(states=np.expand_dims(delta_state, axis=0), stochastic=True)
                 
