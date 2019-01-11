@@ -1,13 +1,13 @@
 import tensorflow as tf
 
-class PPO():
+class PPOModel():
 	def __init__(self, name, action_size):
 		self.seed = 0
 		self.action_size = action_size
 		with tf.variable_scope(name):
 			self.states = tf.placeholder(tf.float32, [None, action_size])
 	def build_model(self, states):
-		with tf.variable_scope('policy_net', reuse=tf.AUTO_REUSE):
+		with tf.variable_scope('policy_net', reuse=False):
 			conv1 = tf.layers.conv2d(
 					inputs=self.states,
 					filters=32,
