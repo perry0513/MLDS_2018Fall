@@ -60,7 +60,7 @@ class Environment(object):
                 whether reach the end of the episode?
         '''
         if not self.env.action_space.contains(action):
-            raise ValueError('Ivalid action!!')
+            raise ValueError('Invalid action!!')
 
         observation, reward, done, info = self.env.step(action)
 
