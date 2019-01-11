@@ -3,6 +3,7 @@ import scipy
 import numpy as np
 
 import tensorflow as tf
+import os
 from agent_dir.PPOTrain import PPOTrain
 from agent_dir.PPOModel import PPOModel
 
@@ -44,10 +45,14 @@ class Agent_PG(Agent):
         self.batch_size = args.batch_size
         self.learning_rate = args.learning_rate
         self.episodes = args.episodes
-        self.save_history_period = args.save_history_period
         self.discount_factor = args.discount_factor
         self.render = args.render
         
+        #saving data
+        self.save_history_period = args.save_history_period
+        self.checkpoints_dir = './checkpoints'
+        self.checkpoint_file = os.path.join(self.checkpoints_dir, 'policy_network.ckpt')
+
         # 
         self.action_size = 2 # up/down
         self.states = []
@@ -64,6 +69,24 @@ class Agent_PG(Agent):
         self.theta_k = PPOModel('old_policy', self.action_size)
 
         self.PPO = PPOTrain(self.theta, self.theta_k, gamma=self.discount_factor)
+
+        self.saver = tf.train.Saver()
+
+        if args.load_checkpoint:
+            self.network.load_checkpoint()
+            self.history_recent_avg_reward = np.load('./history_recent_avg_reward.npy').tolist()
+
+        if args.test_pg:
+            print('Loading trained model...')
+            self.load_checkpoint()
+
+    def load_checkpoint(self):
+        print("Loading checkpoint...")
+        self.saver.restore(self.sess, self.checkpoint_file)
+
+    def save_checkpoint(self):
+        print("Saving checkpoint...")
+        self.saver.save(self.sess, self.checkpoint_file)
 
 
 
@@ -147,6 +170,9 @@ class Agent_PG(Agent):
             if recent_avg_reward > self.best_avg_reward:
                 self.best_avg_reward = recent_avg_reward
                 # TODO: save checkpoint
+                print ('[Save Checkpoint] Avg. reward improved from {:2.6f} to {:2.6f}'.format(
+                    self.best_avg_reward, recent_avg_reward))
+                self.save_checkpoint()
             
             # TODO: train
             gaes = self.PPO.get_gaes(rewards=self.rewards, v_preds=self.v_preds, v_preds_next=v_preds_next)
