@@ -105,7 +105,7 @@ class Agent_PG(Agent):
 
             while not done:
                 if self.render:
-                    self.env.render()
+                    self.env.env.render()
 
                 delta_state = state - last_state
                 last_state = state
