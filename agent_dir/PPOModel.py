@@ -69,3 +69,5 @@ class PPOModel():
 
 	def get_trainable_variables(self):
 		return tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, self.scope)
+
+		
