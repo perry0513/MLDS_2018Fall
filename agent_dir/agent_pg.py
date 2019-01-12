@@ -48,12 +48,12 @@ class Agent_PG(Agent):
         self.discount_factor = args.discount_factor
         self.render = args.render
         
-        #saving data
+        # Saving data
         self.save_history_period = args.save_history_period
         self.checkpoints_dir = './checkpoints'
         self.checkpoint_file = os.path.join(self.checkpoints_dir, 'policy_network.ckpt')
 
-        # 
+        # Testing
         self.action_size = 2 # up/down
         self.states = []
         self.actions = []
@@ -65,8 +65,8 @@ class Agent_PG(Agent):
         self.env = env
         self.env.seed(2000)
 
-        self.theta = PPOModel('policy', self.action_size)
-        self.theta_k = PPOModel('old_policy', self.action_size)
+        self.theta = PPOModel('theta', self.action_size)
+        self.theta_k = PPOModel('theta_k', self.action_size)
 
         self.PPO = PPOTrain(self.theta, self.theta_k, gamma=self.discount_factor)
 
@@ -74,20 +74,21 @@ class Agent_PG(Agent):
 
         if args.load_checkpoint:
             self.network.load_checkpoint()
-            self.history_recent_avg_reward = np.load('./history_recent_avg_reward.npy').tolist()
+            self.recent_avg_rewards = np.load('./recent_avg_rewards.npy').tolist()
 
         if args.test_pg:
             print('Loading trained model...')
             self.load_checkpoint()
 
+
     def load_checkpoint(self):
         print("Loading checkpoint...")
         self.saver.restore(self.sess, self.checkpoint_file)
 
+
     def save_checkpoint(self):
         print("Saving checkpoint...")
         self.saver.save(self.sess, self.checkpoint_file)
-
 
 
     def init_game_setting(self):
@@ -101,7 +102,6 @@ class Agent_PG(Agent):
         self.recent_rewards = []
         self.recent_avg_reward = None
         self.best_avg_reward = -30.0
-        pass
 
 
     def train(self):
@@ -169,12 +169,11 @@ class Agent_PG(Agent):
             
             if recent_avg_reward > self.best_avg_reward:
                 self.best_avg_reward = recent_avg_reward
-                # TODO: save checkpoint
                 print ('[Save Checkpoint] Avg. reward improved from {:2.6f} to {:2.6f}'.format(
                     self.best_avg_reward, recent_avg_reward))
                 self.save_checkpoint()
             
-            # TODO: train
+            # gaes denotes for generalized advantage estimation 
             gaes = self.PPO.get_gaes(rewards=self.rewards, v_preds=self.v_preds, v_preds_next=v_preds_next)
 
             states = np.array(self.states).astype(dtype=np.float32)
@@ -189,7 +188,7 @@ class Agent_PG(Agent):
             self.PPO.train(states=states, actions=actions, gaes=gaes, rewards=rewards, v_preds_next=v_preds_next)
 
         if num_episode % self.save_history_period == 0:
-            np.save('recent_avg_reward.py', np.array(self.recent_avg_reward))
+            np.save('recent_avg_rewards.npy', np.array(self.recent_avg_rewards))
 
 
     def make_action(self, observation, test=True):
