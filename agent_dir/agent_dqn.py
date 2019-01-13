@@ -35,6 +35,14 @@ class Agent_DQN(Agent):
 		self.checkpoints_dir = './checkpoints'
 		self.checkpoint_file = os.path.join(self.checkpoints_dir, 'dqn.ckpt')
 
+		self.model_weights = self.model.get_trainable_variables()
+		self.target_model_weights = self.target_model.get_trainable_variables()
+
+        with tf.variables_scope('assign_op'):
+            self.assign_ops = []
+            for model_w, target_w in zip(self.model_weights, self.target_model_weights):
+                self.assign_ops.append(tf.assign(target_w, model_w))
+
 
 	def init_game_setting(self):
 		"""
@@ -71,6 +79,11 @@ class Agent_DQN(Agent):
 				sum_reward += reward
 				self.memory.append((state, action, reward, next_state, done))
 				state = next_state
+				if num_episode % 4 == 0:
+					# TODO: update model
+				if num_episode % 1000 == 0:
+					tf.sess.run(self.assign_ops)
+
 				num_action += 1
 
 			recent_rewards.append(sum_reward)
