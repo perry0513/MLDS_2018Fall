@@ -54,7 +54,7 @@ class DQNModel():
 					inputs = dense1,
 					units = self.action_size + 1,
 					activation = None,
-					kernel_initializer = tfkeras.initializers.glorot_uniform(seed=self.seed),
+					kernel_initializer = tf.keras.initializers.glorot_uniform(seed=self.seed),
 					bias_initializer = tf.zeros_initializer()
 				)
 				self.Q = tf.keras.layers.Lambda(lambda a: tf.expand_dims(a[:, 0], -1) + a[:, 1:] - tf.keras.backend.mean(a[:, 1:], keepdims=True), output_shape=(self.action_size,))(y)
@@ -63,7 +63,7 @@ class DQNModel():
 					inputs = dense1,
 					units = self.action_size,
 					activation = None,
-					kernel_initializer = tfkeras.initializers.glorot_uniform(seed=self.seed),
+					kernel_initializer = tf.keras.initializers.glorot_uniform(seed=self.seed),
 					bias_initializer = tf.zeros_initializer()
 				)
 			self.scope = tf.get_variable_scope().name
