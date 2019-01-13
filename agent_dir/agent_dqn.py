@@ -29,7 +29,7 @@ class Agent_DQN(Agent):
 
 		self.action_size = self.env.action_space.n
 
-        self.model = DQNModel('model',self.action_size, True)
+        self.model = DQNModel('model', self.action_size, True)
         self.target_model = DQNModel('target_model',self.action_size, True)
 
 		self.checkpoints_dir = './checkpoints'
@@ -79,6 +79,11 @@ class Agent_DQN(Agent):
 				sum_reward += reward
 				self.memory.append((state, action, reward, next_state, done))
 				state = next_state
+				if num_episode % 4 == 0:
+					# TODO: update model
+				if num_episode % 1000 == 0:
+					tf.sess.run(self.assign_ops)
+
 				num_action += 1
 
 			recent_rewards.append(sum_reward)
