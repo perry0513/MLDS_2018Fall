@@ -25,6 +25,13 @@ class Agent_DQN(Agent):
 
 		self.action_size = self.env.action_space.n
 
+		# hyper parameters
+		self.gamma = 0.95
+		self.epsilon = 1.0
+		self.eplison_min = 0.05
+		self.eplison_step = 100000
+		self.epsilon_decay = (self.epsilon-self.eplison_min) / self.eplison_step
+
         self.model = DQNModel('model', self.action_size, True)
         self.target_model = DQNModel('target_model', self.action_size, True)
 
@@ -70,8 +77,10 @@ class Agent_DQN(Agent):
 			sum_reward = 0
 
 			while not done:
-				action = self.model.act()
-				next_reward, reward, done, info = self.env.step(action)
+				if self.epsilon > self.epsilon_min:
+					self.epsilon -= self.epsilon_decay
+				action = self.model.act(state, False, self.epsilon)
+				next_state, reward, done, info = self.env.step(action)
 				sum_reward += reward
 				self.memory.append((state, action, reward, next_state, done))
 				state = next_state
