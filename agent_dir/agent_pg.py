@@ -89,22 +89,22 @@ class Agent_PG(Agent):
 	def init_game_setting(self):
 		"""
 
-		Testing functi:qon will call this function at the begining of new game
+		Testing function will call this function at the begining of new game
 		Put anything you want to initialize if necessary
 		
 		"""
 		self.last_state = None
-		self.recent_episode_num = 30
-		self.recent_rewards = []
-		self.recent_avg_reward = None
-		self.best_avg_reward = -30.0
 
 
 	def train(self):
 		"""
 		Implement your training algorithm here
 		"""
-		self.init_game_setting()
+		self.recent_episode_num = 30
+		self.recent_rewards = []
+		self.recent_avg_reward = None
+		self.best_avg_reward = -30.0
+
 
 		self.sess.run(tf.global_variables_initializer())
 		
