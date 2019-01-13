@@ -1,4 +1,5 @@
 import tensorflow as tf
+import random
 
 class DQNModel():
 	def __init__(self, action_size):
@@ -73,7 +74,7 @@ class DQNModel():
 			act_values = tf.get_default_session().run(self.Q, feed_dict={self.state:np.expand_dims(state, axis=0)})
 			return np.argmax(act_values[0])
 		else:
-			if np.random.ran() <= epsilon:
+			if np.random.rand() <= epsilon:
 				return random.randrange(self.action_size)
 			act_values = tf.get_default_session().run(self.Q, {self.state:np.expand_dims(state, axis=0)})
 			return np.argmax(act_values[0])
