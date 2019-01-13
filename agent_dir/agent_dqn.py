@@ -17,7 +17,7 @@ class Agent_DQN(Agent):
 			print('loading trained model')
 
 		self.recent_avg_rewards = []
-		self.memory = deque()
+		self.memory = deque(maxlen=10000)
 
 		self.save_history_period = args.save_history_period
 		self.episodes = args.episodes
