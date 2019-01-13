@@ -30,13 +30,18 @@ class Agent_DQN(Agent):
 		self.action_size = self.env.action_space.n
 
         self.model = DQNModel('model',self.action_size, True)
-        self.target_model = DQNModel(self.action_size, True)
+        self.target_model = DQNModel('target_model',self.action_size, True)
 
 		self.checkpoints_dir = './checkpoints'
 		self.checkpoint_file = os.path.join(self.checkpoints_dir, 'dqn.ckpt')
 
-		self.model_weights = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLS, )
-		self.target_model
+		self.model_weights = self.model.get_trainable_variables()
+		self.target_model_weights = self.target_model.get_trainable_variables()
+
+        with tf.variables_scope('assign_op'):
+            self.assign_ops = []
+            for model_w, target_w in zip(self.model_weights, self.target_model_weights):
+                self.assign_ops.append(tf.assign(target_w, model_w))
 
 
 	def init_game_setting(self):
