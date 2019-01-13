@@ -3,6 +3,8 @@ import numpy as np
 import tensorflow as tf
 import os
 
+from agent_dir.DQNModel import DQNModel
+
 class Agent_DQN(Agent):
 	def __init__(self, env, args):
 		"""
@@ -11,6 +13,8 @@ class Agent_DQN(Agent):
 		"""
 
 		super(Agent_DQN,self).__init__(env)
+
+        self.sess = tf.InteractiveSession()
 
 		if args.test_dqn:
 			#you can load your model here
@@ -24,6 +28,9 @@ class Agent_DQN(Agent):
 		self.learning_rate = args.learning_rate
 
 		self.action_size = self.env.action_space.n
+
+        self.model = DQNModel('model',self.action_size, True)
+        self.target_model = DQNModel(self.action_size, True)
 
 		self.checkpoints_dir = './checkpoints'
 		self.checkpoint_file = os.path.join(self.checkpoints_dir, 'dqn.ckpt')
