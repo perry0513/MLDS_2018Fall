@@ -6,8 +6,6 @@ class DQNModel():
 		self.seed = 0
 		self.dqn_duel = dqn_duel
 		self.action_size = action_size
-	
-	def build_model(self, name: str, dqn_duel=False):
 		self.state = tf.placeholder(tf.float32, (None, 84, 84, 4))
 		with tf.variable_scope(name):
 			conv1 = tf.layers.conv2d(
