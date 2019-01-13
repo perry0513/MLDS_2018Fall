@@ -17,7 +17,7 @@ class Agent_DQN(Agent):
 			print('loading trained model')
 
 		self.recent_avg_rewards = []
-		self.memory = deque()
+		self.memory = deque(maxlen=10000)
 
 		self.save_history_period = args.save_history_period
 		self.episodes = args.episodes
@@ -27,6 +27,9 @@ class Agent_DQN(Agent):
 
 		self.checkpoints_dir = './checkpoints'
 		self.checkpoint_file = os.path.join(self.checkpoints_dir, 'dqn.ckpt')
+
+		self.model_weights = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLS, )
+		self.target_model
 
 
 	def init_game_setting(self):
