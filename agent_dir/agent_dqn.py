@@ -29,8 +29,8 @@ class Agent_DQN(Agent):
 
 		self.action_size = self.env.action_space.n
 
-        self.model = DQNModel('model',self.action_size, True)
-        self.target_model = DQNModel(self.action_size, True)
+        self.model = DQNModel('model', self.action_size, True)
+        self.target_model = DQNModel('target_model', self.action_size, True)
 
 		self.checkpoints_dir = './checkpoints'
 		self.checkpoint_file = os.path.join(self.checkpoints_dir, 'dqn.ckpt')
@@ -105,5 +105,5 @@ class Agent_DQN(Agent):
 		##################
 		# YOUR CODE HERE #
 		##################
-		return self.env.get_random_action()
+		return self.act(observation, True)
 
