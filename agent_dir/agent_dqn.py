@@ -53,8 +53,8 @@ class Agent_DQN(Agent):
 		best_avg_reward = 0.0
 
 		for num_episode in range(self.episodes):
-			done = False
 			state = self.env.reset()
+            done = False
 			num_action = 0
 			sum_reward = 0
 
