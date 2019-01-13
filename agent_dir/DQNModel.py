@@ -1,4 +1,5 @@
 import tensorflow as tf
+import random
 
 class DQNModel():
 	def __init__(self, action_size):
@@ -54,7 +55,7 @@ class DQNModel():
 					inputs = dense1,
 					units = self.action_size + 1,
 					activation = None,
-					kernel_initializer = tfkeras.initializers.glorot_uniform(seed=self.seed),
+					kernel_initializer = tf.keras.initializers.glorot_uniform(seed=self.seed),
 					bias_initializer = tf.zeros_initializer()
 				)
 				self.Q = tf.keras.layers.Lambda(lambda a: tf.expand_dims(a[:, 0], -1) + a[:, 1:] - tf.keras.backend.mean(a[:, 1:], keepdims=True), output_shape=(self.action_size,))(y)
@@ -63,7 +64,7 @@ class DQNModel():
 					inputs = dense1,
 					units = self.action_size,
 					activation = None,
-					kernel_initializer = tfkeras.initializers.glorot_uniform(seed=self.seed),
+					kernel_initializer = tf.keras.initializers.glorot_uniform(seed=self.seed),
 					bias_initializer = tf.zeros_initializer()
 				)
 			self.scope = tf.get_variable_scope().name
@@ -73,7 +74,7 @@ class DQNModel():
 			act_values = tf.get_default_session().run(self.Q, feed_dict={self.state:np.expand_dims(state, axis=0)})
 			return np.argmax(act_values[0])
 		else:
-			if np.random.ran() <= epsilon:
+			if np.random.rand() <= epsilon:
 				return random.randrange(self.action_size)
 			act_values = tf.get_default_session().run(self.Q, {self.state:np.expand_dims(state, axis=0)})
 			return np.argmax(act_values[0])
