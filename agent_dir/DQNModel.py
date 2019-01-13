@@ -4,6 +4,7 @@ import random
 class DQNModel():
 	def __init__(self,name: str, action_size, dqn_duel=False):
 		self.seed = 0
+		self.dqn_duel = dqn_duel
 		self.action_size = action_size
 	
 	def build_model(self, name: str, dqn_duel=False):
@@ -69,7 +70,7 @@ class DQNModel():
 				)
 			self.scope = tf.get_variable_scope().name
 
-	def act(self, state, test, epsilon):
+	def act(self, state, test, epsilon=0):
 		if test:
 			act_values = tf.get_default_session().run(self.Q, feed_dict={self.state:np.expand_dims(state, axis=0)})
 			return np.argmax(act_values[0])
