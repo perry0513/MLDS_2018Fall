@@ -1,7 +1,10 @@
 from agent_dir.agent import Agent
+from agent_dir.DQNModel import DQNModel
+from collections import deque
 import numpy as np
 import tensorflow as tf
 import os
+import random
 
 class Agent_DQN(Agent):
 	def __init__(self, env, args):
@@ -30,9 +33,9 @@ class Agent_DQN(Agent):
 		# hyper parameters
 		self.gamma = 0.95
 		self.epsilon = 1.0
-		self.eplison_min = 0.025
-		self.eplison_step = 100000
-		self.epsilon_decay = (self.epsilon-self.eplison_min) / self.eplison_step
+		self.epsilon_min = 0.025
+		self.epsilon_step = 100000
+		self.epsilon_decay = (self.epsilon-self.epsilon_min) / self.epsilon_step
 
 		self.model = DQNModel('model', self.action_size, self.duel_dqn)
 		self.target_model = DQNModel('target_model', self.action_size, self.duel_dqn)
@@ -43,7 +46,7 @@ class Agent_DQN(Agent):
 		self.model_weights = self.model.get_trainable_variables()
 		self.target_model_weights = self.target_model.get_trainable_variables()
 
-		with tf.variables_scope('assign_op'):
+		with tf.variable_scope('assign_op'):
 			self.assign_ops = []
 			for model_w, target_w in zip(self.model_weights, self.target_model_weights):
 				self.assign_ops.append(tf.assign(target_w, model_w))
@@ -54,7 +57,6 @@ class Agent_DQN(Agent):
 
 		self.saver = tf.train.Saver()
 		self.sess.run(tf.global_variables_initializer())
-		self.sess.run(self.assign_ops)
 
 		if args.test_dqn:
 			#you can load your model here
@@ -75,6 +77,8 @@ class Agent_DQN(Agent):
 		pass
 
 	def replay(self, batch_size):
+		if len(self.memory) < batch_size * 10:
+			return 0, 0
 		batch = random.sample(self.memory, batch_size)
 
 		states, actions, rewards, next_states, dones = [], [], [], [], []
@@ -101,7 +105,9 @@ class Agent_DQN(Agent):
 		else:
 			targets[:, actions] = rewards + (1 - dones) * self.gamma * target_actions[:, np.argmax(next_actions, axis=1)]
 
+		_, loss = self.sess.run([self.train_op, self.loss], feed_dict={self.model.state: states, self.target: targets})
 
+		return loss, np.amax(next_actions)				
 
 	def train(self):
 		"""
@@ -118,6 +124,8 @@ class Agent_DQN(Agent):
 			done = False
 			num_action = 0
 			sum_reward = 0
+			total_loss = 0
+			total_maxQ = [0]
 
 			while not done:
 				if self.epsilon > self.epsilon_min:
@@ -128,7 +136,9 @@ class Agent_DQN(Agent):
 				self.memory.append((state, action, reward, next_state, done))
 				state = next_state
 				if num_episode % 4 == 0:
-					# TODO: update model
+					loss, maxQ = self.replay(self.batch_size)
+					total_loss += loss
+					total_maxQ.append(maxQ)
 				if num_episode % 1000 == 0:
 					self.sess.run(self.assign_ops)
 
@@ -139,7 +149,10 @@ class Agent_DQN(Agent):
 				recent_rewards.pop(0)
 			recent_avg_reward = sum(recent_rewards)/len(recent_rewards)
 			self.recent_avg_rewards.append(recent_avg_reward)
-			# TODO: print something out
+			print('Episode: {:>5} | Actions: {:>5} | Avg. reward: {:2.6f}'.format(
+				num_episode, num_action, recent_avg_reward), end='')
+			if num_episode % 4 != 0: print()
+			else: print(' | Loss: {:.6f} | Q: {:.6f}'.format(total_loss/num_action, np.max(total_maxQ)))
 
 			if recent_avg_reward > best_avg_reward:
 				print ('[Save Checkpoint] Avg. reward improved from {:2.6f} to {:2.6f}'.format(
@@ -148,7 +161,7 @@ class Agent_DQN(Agent):
 				print ('Saving Checkpoint...')
 				self.saver.save(self.sess, self.checkpoint_file)
 
-			if episode % self.save_history_period == 0:
+			if num_episode % self.save_history_period == 0:
 				np.save('recent_avg_rewards.npy', np.array(self.recent_avg_rewards))
 
 
@@ -167,5 +180,5 @@ class Agent_DQN(Agent):
 		##################
 		# YOUR CODE HERE #
 		##################
-		return self.act(observation, True)
+		return self.model.act(observation, True)
 
