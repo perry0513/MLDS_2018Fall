@@ -3,8 +3,6 @@ import numpy as np
 import tensorflow as tf
 import os
 
-from agent_dir.DQNModel import DQNModel
-
 class Agent_DQN(Agent):
 	def __init__(self, env, args):
 		"""
@@ -13,8 +11,6 @@ class Agent_DQN(Agent):
 		"""
 
 		super(Agent_DQN,self).__init__(env)
-
-        self.sess = tf.InteractiveSession()
 
 		if args.test_dqn:
 			#you can load your model here
@@ -74,7 +70,7 @@ class Agent_DQN(Agent):
 			sum_reward = 0
 
 			while not done:
-				action = # TODO
+				action = self.model.act()
 				next_reward, reward, done, info = self.env.step(action)
 				sum_reward += reward
 				self.memory.append((state, action, reward, next_state, done))
