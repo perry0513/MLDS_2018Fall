@@ -17,7 +17,7 @@ class Agent_DQN(Agent):
 			print('loading trained model')
 
 		self.recent_avg_rewards = []
-		self.memory = deque()
+		self.memory = deque(maxlen=10000)
 
 		self.save_history_period = args.save_history_period
 		self.episodes = args.episodes
@@ -25,14 +25,19 @@ class Agent_DQN(Agent):
 
 		self.action_size = self.env.action_space.n
 
-<<<<<<< HEAD
         self.model = DQNModel('model', self.action_size, True)
         self.target_model = DQNModel('target_model', self.action_size, True)
 
-=======
->>>>>>> parent of 70549a9... modify DQNModel.py
 		self.checkpoints_dir = './checkpoints'
 		self.checkpoint_file = os.path.join(self.checkpoints_dir, 'dqn.ckpt')
+
+		self.model_weights = self.model.get_trainable_variables()
+		self.target_model_weights = self.target_model.get_trainable_variables()
+
+        with tf.variables_scope('assign_op'):
+            self.assign_ops = []
+            for model_w, target_w in zip(self.model_weights, self.target_model_weights):
+                self.assign_ops.append(tf.assign(target_w, model_w))
 
 
 	def init_game_setting(self):
@@ -70,6 +75,11 @@ class Agent_DQN(Agent):
 				sum_reward += reward
 				self.memory.append((state, action, reward, next_state, done))
 				state = next_state
+				if num_episode % 4 == 0:
+					# TODO: update model
+				if num_episode % 1000 == 0:
+					tf.sess.run(self.assign_ops)
+
 				num_action += 1
 
 			recent_rewards.append(sum_reward)
@@ -104,5 +114,5 @@ class Agent_DQN(Agent):
 		##################
 		# YOUR CODE HERE #
 		##################
-		return self.env.get_random_action()
+		return self.act(observation, True)
 
