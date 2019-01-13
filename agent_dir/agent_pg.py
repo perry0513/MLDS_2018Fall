@@ -36,10 +36,6 @@ class Agent_PG(Agent):
 		super(Agent_PG,self).__init__(env)
 
 		self.sess = tf.InteractiveSession()
-
-		if args.test_pg:
-			#you can load your model here
-			print('loading trained model')
 		
 		# Load Arguments
 		self.batch_size = args.batch_size
@@ -84,6 +80,7 @@ class Agent_PG(Agent):
 	def load_checkpoint(self):
 		print("Loading checkpoint...")
 		self.saver.restore(self.sess, self.checkpoint_file)
+		print('Checkpoint loaded')
 
 
 	def save_checkpoint(self):
@@ -97,6 +94,7 @@ class Agent_PG(Agent):
 		Put anything you want to initialize if necessary
 		
 		"""
+		self.last_state = None
 		self.recent_episode_num = 30
 		self.recent_rewards = []
 		self.recent_avg_reward = None
@@ -168,9 +166,9 @@ class Agent_PG(Agent):
 			print ('Episode {:d} | Actions {:4d} | Reward {:2.3f} | Avg. reward {:2.6f}'.format(num_episode, num_actions, sum_reward_per_episode, recent_avg_reward))
 			
 			if recent_avg_reward > self.best_avg_reward:
-				self.best_avg_reward = recent_avg_reward
 				print ('[Save Checkpoint] Avg. reward improved from {:2.6f} to {:2.6f}'.format(
 					self.best_avg_reward, recent_avg_reward))
+				self.best_avg_reward = recent_avg_reward
 				self.save_checkpoint()
 			
 			# gaes denotes for generalized advantage estimations
@@ -206,9 +204,16 @@ class Agent_PG(Agent):
 			action: int
 				the predicted action from trained model
 		"""
-		##################
-		# YOUR CODE HERE #
-		##################
-		return self.env.get_random_action()
+		if self.render:
+			self.env.env.render()
+
+		state = prepro(observation)
+		delta_state = state if self.last_state is None else state - self.last_state
+		self.last_state = state
+		
+		action, v_pred = self.theta.act(states=np.expand_dims(delta_state, axis=0), stochastic=False)
+		action = np.asscalar(action)
+		
+		return action + 2
 
 
