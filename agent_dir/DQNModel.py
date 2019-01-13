@@ -2,7 +2,7 @@ import tensorflow as tf
 import random
 
 class DQNModel():
-	def __init__(self, action_size):
+	def __init__(self,name: str, action_size, dqn_duel=False):
 		self.seed = 0
 		self.action_size = action_size
 		self.state = tf.placeholder(tf.float32, (None, 84, 84, 4))
