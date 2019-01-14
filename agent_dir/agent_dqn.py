@@ -27,6 +27,7 @@ class Agent_DQN(Agent):
 		self.episodes = args.episodes
 		self.learning_rate = args.learning_rate
 		self.batch_size = 32
+		self.render = args.render
 
 		self.action_size = self.env.action_space.n
 
@@ -101,9 +102,9 @@ class Agent_DQN(Agent):
 		target_actions = self.sess.run(self.target_model.Q, feed_dict={self.target_model.state: next_states})
 
 		if not self.double_dqn:
-			targets[:, actions] = rewards + (1 - dones) * self.gamma * np.max(target_actions, axis=1)
+			targets[range(batch_size), actions] = rewards + (1 - dones) * self.gamma * np.max(target_actions, axis=1)
 		else:
-			targets[:, actions] = rewards + (1 - dones) * self.gamma * target_actions[:, np.argmax(next_actions, axis=1)]
+			targets[range(batch_size), actions] = rewards + (1 - dones) * self.gamma * target_actions[range(batch_size), np.argmax(next_actions, axis=1)]
 
 		_, loss = self.sess.run([self.train_op, self.loss], feed_dict={self.model.state: states, self.target: targets})
 
@@ -128,6 +129,8 @@ class Agent_DQN(Agent):
 			total_maxQ = [0]
 
 			while not done:
+				if self.render:
+					self.env.env.render()
 				if self.epsilon > self.epsilon_min:
 					self.epsilon -= self.epsilon_decay
 				action = self.model.act(state, False, self.epsilon)
