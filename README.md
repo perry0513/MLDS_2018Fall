@@ -24,7 +24,7 @@ testing DQN:
 #### Model
 * gray scale -> difference between frames
 * Conv(filter = 32, kernel = [8,8], strides = [4,4])
-* Conv(filter = 64, kernal = [4,4]m strides = [2,2])
+* Conv(filter = 64, kernal = [4,4], strides = [2,2])
 * Flatten
 * Dense(128)
 * Dense(2)
@@ -32,4 +32,18 @@ testing DQN:
 * Variance Reduction
 #### Test result: mean = 9.8
 ![pong(ppo)](./training_process/pong_pg.png)
+
+### Breakout (DQN)
+#### Model
+* Conv(filter = 32, kernel = [8,8], strides = [4,4])
+* Conv(filter = 64, kernal = [4,4], strides = [2,2])
+* Conv(filter = 64, kernal = [3,3], strides = [1,1])
+* Flatten
+* Dense(512)
+* Dense(3)
+#### Tips
+* Double DQN
+* Duel DQN
+#### Test result: mean = 28.9
+![breakout(DQN)](./training_process/breakout.png)
 
