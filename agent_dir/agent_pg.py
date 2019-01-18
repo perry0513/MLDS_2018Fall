@@ -1,6 +1,7 @@
 from agent_dir.agent import Agent
 import scipy
 import numpy as np
+
 import tensorflow as tf
 import os
 from agent_dir.PPOTrain import PPOTrain
@@ -35,6 +36,10 @@ class Agent_PG(Agent):
 		super(Agent_PG,self).__init__(env)
 
 		self.sess = tf.InteractiveSession()
+
+		if args.test_pg:
+			#you can load your model here
+			print('loading trained model')
 		
 		# Load Arguments
 		self.batch_size = args.batch_size
@@ -45,7 +50,7 @@ class Agent_PG(Agent):
 		
 		# Saving data
 		self.save_history_period = args.save_history_period
-		self.checkpoints_dir = './checkpoints'
+		self.checkpoints_dir = './checkpoints_pg'
 		self.checkpoint_file = os.path.join(self.checkpoints_dir, 'policy_network.ckpt')
 		
 		# Testing
@@ -79,7 +84,6 @@ class Agent_PG(Agent):
 	def load_checkpoint(self):
 		print("Loading checkpoint...")
 		self.saver.restore(self.sess, self.checkpoint_file)
-		print('Checkpoint loaded')
 
 
 	def save_checkpoint(self):
@@ -89,21 +93,22 @@ class Agent_PG(Agent):
 	def init_game_setting(self):
 		"""
 
-		Testing function will call this function at the begining of new game
+		Testing functi:qon will call this function at the begining of new game
 		Put anything you want to initialize if necessary
 		
 		"""
 		self.last_state = None
+		self.recent_episode_num = 30
+		self.recent_rewards = []
+		self.recent_avg_reward = None
+		self.best_avg_reward = -30.0
 
 
 	def train(self):
 		"""
 		Implement your training algorithm here
 		"""
-		recent_episode_num = 30
-		recent_rewards = []
-		recent_avg_reward = None
-		best_avg_reward = -30.0
+		self.init_game_setting()
 
 		self.sess.run(tf.global_variables_initializer())
 		
@@ -154,23 +159,25 @@ class Agent_PG(Agent):
 			
 			v_preds_next = self.v_preds[1:] + [0] # next state of terminate state has 0 state value
 
-			recent_rewards.append(sum_reward_per_episode)
-			if len(recent_rewards) > recent_episode_num:
-				recent_rewards.pop(0)
+			self.recent_rewards.append(sum_reward_per_episode)
+			if len(self.recent_rewards) > self.recent_episode_num:
+				self.recent_rewards.pop(0)
 
-			recent_avg_reward = sum(recent_rewards) / len(recent_rewards)
+			recent_avg_reward = sum(self.recent_rewards) / len(self.recent_rewards)
 			self.recent_avg_rewards.append(recent_avg_reward)
 
 			print ('Episode {:d} | Actions {:4d} | Reward {:2.3f} | Avg. reward {:2.6f}'.format(num_episode, num_actions, sum_reward_per_episode, recent_avg_reward))
 			
-			if recent_avg_reward > best_avg_reward:
+			if recent_avg_reward > self.best_avg_reward:
 				print ('[Save Checkpoint] Avg. reward improved from {:2.6f} to {:2.6f}'.format(
-					best_avg_reward, recent_avg_reward))
-				best_avg_reward = recent_avg_reward
+					self.best_avg_reward, recent_avg_reward))
+				self.best_avg_reward = recent_avg_reward
 				self.save_checkpoint()
 			
 			# gaes denotes for generalized advantage estimations
 			gaes = self.PPO.get_gaes(rewards=self.rewards, v_preds=self.v_preds, v_preds_next=v_preds_next)
+			# g_t
+			g_t = self.PPO.get_g_t(rewards=self.rewards)
 
 			states = np.array(self.states).astype(dtype=np.float32)
 			actions = np.array(self.actions).astype(dtype=np.int32)
@@ -181,12 +188,12 @@ class Agent_PG(Agent):
 
 			self.PPO.assign_policy_parameters()
 
-			self.PPO.train(states=states, actions=actions, gaes=gaes, rewards=rewards, v_preds_next=v_preds_next)
+			self.PPO.train(states=states, actions=actions, adv_func=g_t, rewards=rewards, v_preds_next=v_preds_next)
 			
 			self.states, self.actions, self.v_preds, self.rewards = [], [], [], []
 
 			if num_episode % self.save_history_period == 0:
-				np.save('recent_avg_rewards.npy', np.array(self.recent_avg_rewards))
+				np.save('recent_avg_rewards_pg.npy', np.array(self.recent_avg_rewards))
 			num_episode += 1
 
 
@@ -204,7 +211,6 @@ class Agent_PG(Agent):
 		"""
 		if self.render:
 			self.env.env.render()
-
 		state = prepro(observation)
 		delta_state = state if self.last_state is None else state - self.last_state
 		self.last_state = state

@@ -1,4 +1,5 @@
 import tensorflow as tf
+import numpy as np
 import copy
 
 class PPOTrain:
@@ -21,7 +22,7 @@ class PPOTrain:
 			self.actions = tf.placeholder(dtype=tf.int32, shape=[None], name='actions')
 			self.rewards = tf.placeholder(dtype=tf.float32, shape=[None], name='rewards')
 			self.v_preds_next = tf.placeholder(dtype=tf.float32, shape=[None], name='v_preds_next')
-			self.gaes = tf.placeholder(dtype=tf.float32, shape=[None], name='gaes')
+			self.adv_func = tf.placeholder(dtype=tf.float32, shape=[None], name='adv_func')
 		
 		act_probs = self.Policy.act_probs
 		act_probs_old = self.Old_Policy.act_probs
@@ -39,7 +40,7 @@ class PPOTrain:
 			ratios = tf.exp(tf.log(tf.clip_by_value(act_probs, 1e-10, 1.0))
 							- tf.log(tf.clip_by_value(act_probs_old, 1e-10, 1.0)))
 			clipped_ratios = tf.clip_by_value(ratios, clip_value_min=1 - clip_value, clip_value_max=1 + clip_value)
-			loss_clip = tf.minimum(tf.multiply(self.gaes, ratios), tf.multiply(self.gaes, clipped_ratios))
+			loss_clip = tf.minimum(tf.multiply(self.adv_func, ratios), tf.multiply(self.adv_func, clipped_ratios))
 			loss_clip = tf.reduce_mean(loss_clip)
 
 			# construct computation graph for loss of entropy bonus
@@ -51,23 +52,40 @@ class PPOTrain:
 			v_preds = self.Policy.v_preds
 			loss_vf = tf.squared_difference(self.rewards + self.gamma * self.v_preds_next, v_preds)
 			loss_vf = tf.reduce_mean(loss_vf)
-
-			loss = loss_clip - c_1 * loss_vf + c_2 * entropy
-			loss = -loss
+			
+			'''loss for gae'''
+#			loss = loss_clip - c_1 * loss_vf + c_2 * entropy
+#			loss = -loss
+			
+			'''loss for g_t'''
+			loss = -loss_clip
 		optimizer = tf.train.AdamOptimizer(learning_rate=1e-4, epsilon=1e-5)
 		self.gradients = optimizer.compute_gradients(loss, var_list=pi_trainable)
 		self.train_op = optimizer.minimize(loss, var_list=pi_trainable)
 	
-	def train(self, states, actions, gaes, rewards, v_preds_next):
+	def train(self, states, actions, adv_func, rewards, v_preds_next):
 		tf.get_default_session().run(self.train_op, feed_dict={	self.Policy.states: states,
 																self.Old_Policy.states: states,
 																self.actions: actions,
 																self.rewards: rewards,
 																self.v_preds_next: v_preds_next,
-																self.gaes: gaes})
+																self.adv_func: adv_func})
 
 	def assign_policy_parameters(self):
 		return tf.get_default_session().run(self.assign_ops)
+	
+	def get_g_t(self, rewards):
+		# discount episode rewards
+		discounted_ep_rs = np.zeros_like(rewards)
+		running_add = 0
+		for t in reversed(range(0, len(rewards))):
+			running_add = running_add * self.gamma + rewards[t]
+			discounted_ep_rs[t] = running_add
+
+		# normalize episode rewards
+		discounted_ep_rs -= np.mean(discounted_ep_rs)
+		discounted_ep_rs /= np.std(discounted_ep_rs)
+		return discounted_ep_rs
 	
 	def get_gaes(self, rewards, v_preds, v_preds_next):
 		deltas = [r_t + self.gamma * v_next - v for r_t, v_next, v in zip(rewards, v_preds_next, v_preds)]
@@ -77,10 +95,10 @@ class PPOTrain:
 			gaes[t] = gaes[t] + self.gamma * gaes[t + 1]
 		return gaes
 
-	def get_grad(self, states, actions, gaes, rewards, v_preds_next):
+	def get_grad(self, states, actions, adv_func, rewards, v_preds_next):
 		return tf.get_default_session().run(self.gradients, feed_dict={	self.Policy.states: states,
 																		self.Old_Policy.states: states,
 																		self.actions: actions,
 																		self.rewards: rewards,
 																		self.v_preds_next: v_preds_next,
-																		self.gaes: gaes})
+																		self.adv_func: adv_func})
