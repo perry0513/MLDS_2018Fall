@@ -27,6 +27,7 @@ class Agent_DQN(Agent):
 		self.episodes = args.episodes
 		self.learning_rate = args.learning_rate
 		self.batch_size = 32
+		self.render = args.render
 
 		self.action_size = self.env.action_space.n
 
@@ -180,5 +181,7 @@ class Agent_DQN(Agent):
 		##################
 		# YOUR CODE HERE #
 		##################
+		if self.render:
+			self.env.env.render()
 		return self.model.act(observation, True)
 
