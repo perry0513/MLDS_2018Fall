@@ -1,0 +1,3 @@
+*__pycache__
+checkpoints*
+recent_avg_rewards*.npy
