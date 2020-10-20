@@ -1,0 +1,8 @@
+hw2-1/MLDS_hw2_1_data/
+hw2-2/MLDS_hw2_2_data/
+*.DS_Store
+*model/
+*.vscode/
+*__pycache__/
+hw2-2/sel_conversation/
+hw2-2/word2vec.model
